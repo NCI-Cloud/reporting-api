@@ -1,0 +1,185 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "0.1.0",
+        "title": "OpenStack Reporting API",
+        "description": "A RESTful interface to a collection of reports."
+    },
+    "host": "130.56.242.65:9494",
+    "schemes": [
+        "http"
+    ],
+    "basePath": "/",
+    "consumes": [
+        "application/json",
+        "text/xml"
+    ],
+    "produces": [
+        "application/json",
+        "text/xml"
+    ],
+    "definitions": {
+        "APIVersionLink": {
+            "description": "API version link",
+            "type": "object",
+            "properties": {
+                "href": {
+                    "description": "URL",
+                    "type": "string"
+                },
+                "rel": {
+                    "description": "Relation to the API version",
+                    "type": "string"
+                }
+            }
+        },
+        "APIVersion": {
+            "description": "A version of the API",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Unique identifier for this version",
+                    "type": "string"
+                },
+                "links": {
+                    "description": "Array of links",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/APIVersionLink"
+                    }
+                }
+            }
+        },
+        "ReportDetails": {
+            "description": "Details of a report",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Unique name of this report",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "Description of this report",
+                    "type": "string"
+                },
+                "lastUpdated": {
+                    "description": "Time this report's data was last updated",
+                    "type": "string",
+                    "format": "date-time"
+                }
+            }
+        },
+        "Result": {
+            "description": "A result in a report, with properties dependent on the report",
+            "type": "object",
+            "properties": {}
+        },
+        "ResultSet": {
+            "description": "A set of of results from a report",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Result"
+            }
+        }
+    },
+    "paths": {
+        "/": {
+            "get": {
+                "summary": "List API versions",
+                "description": "Returns a collection of available versions of the Reporting API.",
+                "responses": {
+                    "200": {
+                        "description": "A collection of API versions",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/APIVersion"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/reports": {
+            "get": {
+                "summary": "List reports",
+                "description": "Returns a collection of names of available reports.",
+                "responses": {
+                    "200": {
+                        "description": "A collection of available report names.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "description": "Report name"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/reports_detail": {
+            "get": {
+                "summary": "List reports with additional detail",
+                "description": "Returns a collection of available reports, with detailed information on each report.",
+                "responses": {
+                    "200": {
+                        "description": "A collection of available reports, with detailed information on each report.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ReportDetails"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/reports/{report}": {
+            "get": {
+                "summary": "Get report detail",
+                "description": "Detailed information about a report",
+                "parameters": [
+                    {
+                        "name": "report",
+                        "in": "path",
+                        "description": "Name of report",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detailed information about the requested report",
+                        "schema": {
+                            "$ref": "#/definitions/ReportDetails"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/reports/{report}/data": {
+            "get": {
+                "summary": "Get report result set",
+                "description": "Retrieve a result set from the given report",
+                "parameters": [
+                    {
+                        "name": "report",
+                        "in": "path",
+                        "description": "Name of report",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Report result set",
+                        "schema": {
+                            "$ref": "#/definitions/ResultSet"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
