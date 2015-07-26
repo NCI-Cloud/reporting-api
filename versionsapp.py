@@ -8,7 +8,7 @@ class VersionsApp(Application):
 
 	version_classes = [ APIv1App ]
 
-	def APIVersionList(self):
+	def APIVersionList(self, args):
 		return Response(content_type = 'application/json', body = json.dumps([
 			{
 				"id": version._version_identifier(),
@@ -21,7 +21,7 @@ class VersionsApp(Application):
 			} for version in self.version_classes
 		]))
 
-	def APIVersion(self):
+	def APIVersion(self, args):
 		return Response(content_type = 'application/json', body = json.dumps({
 			'todo': 'Report detail'
 		}))

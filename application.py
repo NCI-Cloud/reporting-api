@@ -23,5 +23,5 @@ class Application(object):
 					if method is None:
 						# Method specified in interface specification, but not matching Python method found
 						return webob.exc.HTTPNotImplemented()
-					return method()
+					return method(routing_args[1])
 		return webob.exc.HTTPNotFound()
