@@ -4,4 +4,4 @@ from application import Application
 class APIVersion(Application):
 
 	@abstractmethod
-	def version_identifier(cls): pass
+	def _version_identifier(cls): pass

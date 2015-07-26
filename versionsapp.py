@@ -8,18 +8,23 @@ class VersionsApp(Application):
 
 	version_classes = [ APIv1App ]
 
-	def get_response(self):
+	def APIVersionList(self):
 		return Response(content_type = 'application/json', body = json.dumps([
 			{
-				"id": version.version_identifier(),
+				"id": version._version_identifier(),
 				"links": [
 					{
-						"href": "/" + version.version_identifier(),
+						"href": "/" + version._version_identifier(),
 						"rel": "self"
 					}
 				]
 			} for version in self.version_classes
 		]))
+
+	def APIVersion(self):
+		return Response(content_type = 'application/json', body = json.dumps({
+			'todo': 'Report detail'
+		}))
 
 def factory(global_config, **settings):
 	return VersionsApp()

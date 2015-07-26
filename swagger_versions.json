@@ -69,6 +69,21 @@
                     }
                 }
             }
+        },
+        "/{version}": {
+            "x-handler": "APIVersion",
+            "get": {
+                "summary": "API version detail",
+                "description": "Returns detail of one available version of the Reporting API.",
+                "responses": {
+                    "200": {
+                        "description": "A collection of API versions",
+                        "schema": {
+                          "$ref": "#/definitions/APIVersion"
+                        }
+                    }
+                }
+            }
         }
     }
 }

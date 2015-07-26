@@ -1,14 +1,13 @@
 #!/usr/bin/python
 
 import json
-from pprint import pprint
 from routes.middleware import RoutesMiddleware
 from routes import Mapper
 
 class SwaggerMapper(Mapper):
 	"""
 	A WSGI URL router middleware that automatically configures itself
-	Using a Swagger specification.
+	using a Swagger JSON API specification.
 	"""
 
 	# The Swagger specification v2.0 mandates use of only these methods
@@ -16,10 +15,21 @@ class SwaggerMapper(Mapper):
 
 	def __init__(self, swagger_spec):
 		super(SwaggerMapper, self).__init__();
+		"""
+		To debug this Mapper:
+		logging.basicConfig()
+		logger = logging.getLogger('routes.middleware')
+		logger.setLevel(logging.DEBUG)
+		"""
+		"""
+		FIXME: This breaks matching for apps whose Paste configuration
+		has them served from a URL other than the root '/'.
 		if 'basePath' in swagger_spec:
 			base_path = swagger_spec['basePath']
 		else:
 			base_path = ''
+		"""
+		base_path = ''
 		for path, pathdef in swagger_spec['paths'].items():
 			"""
 			NOTE: Use of mapper.collection rather than mapper.connect below
@@ -31,24 +41,29 @@ class SwaggerMapper(Mapper):
 			if 'x-handler' in pathdef:
 				handler_name = pathdef['x-handler']
 				methods = [ method.upper() for method in self.swagger_methods if method.lower() in pathdef ]
-				super(SwaggerMapper, self).connect(handler_name, base_path + path, controller=handler_name, conditions=dict(method=methods))
+				super(SwaggerMapper, self).connect(handler_name, base_path + path, method=handler_name, conditions=dict(method=methods))
 			else:
 				raise ValueError("No x-handler attribute for path '%s'" % path)
+		self.redirect('', '/');
 
-class SwaggerFilter(RoutesMiddleware):
-	def __init__(self, app, mapper):
-		self.app = app;
-		super(SwaggerFilter, self).__init__(app, mapper)
+	def routematch(self, url = None, environ = None):
+		"""Work around a crash in routes.mapper if url is empty"""
+		if url is '':
+			result = self._match('', environ);
+			return result[0], result[1]
+		return super(SwaggerMapper, self).routematch(url, environ)
+
+class SwaggerMiddleware(RoutesMiddleware):
 	def __call__(self, environ, start_response):
-		return self.app(environ, start_response)
+		return super(SwaggerMiddleware, self).__call__(environ, start_response)
 
 def factory(config, **settings):
-	config.update(settings);
-	swagger_file = config.get("swagger_json", "swagger.json");
-	spec = json.loads(open(swagger_file).read())
-	mapper = SwaggerMapper(spec)
 	def filter(app):
-		return SwaggerFilter(app, mapper)
+		config.update(settings);
+		swagger_file = config.get("swagger_json", "swagger.json");
+		spec = json.loads(open(swagger_file).read())
+		mapper = SwaggerMapper(spec)
+		return RoutesMiddleware(app, mapper)
 	return filter
 
 if __name__ == '__main__':
