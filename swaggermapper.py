@@ -60,7 +60,7 @@ class SwaggerMiddleware(RoutesMiddleware):
 def factory(config, **settings):
 	def filter(app):
 		config.update(settings);
-		swagger_file = config.get("swagger_json", "swagger.json");
+		swagger_file = config.get('swagger_json', 'swagger.json');
 		spec = json.loads(open(swagger_file).read())
 		mapper = SwaggerMapper(spec)
 		return RoutesMiddleware(app, mapper)
