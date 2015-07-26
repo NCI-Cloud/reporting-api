@@ -1,3 +1,4 @@
+import time
 import re
 import json
 import ConfigParser
@@ -15,17 +16,24 @@ class APIv1App(APIVersion):
 			host = self.config.get('database', 'hostname'),
 			user = self.config.get('database', 'username'),
 			passwd = self.config.get('database', 'password'),
-			db = self.config.get('database', 'dbname'),
-			cursorclass = MySQLdb.cursors.DictCursor
+			db = self.config.get('database', 'dbname')
 		)
-		self.cursor = self.dbconn.cursor()
 
 	@classmethod
 	def _version_identifier(cls):
 		return "v1";
 
 	def ReportsList(self, args):
-		return Response(content_type = 'application/json', body = json.dumps({ "todo": "List of reports" }))
+		cursor = self.dbconn.cursor(cursors.Cursor);
+		cursor.execute('SHOW TABLES;')
+		tables = cursor.fetchall()
+		return Response(content_type = 'application/json', body = json.dumps([
+			{
+				'name': row[0],
+				'description': 'TODO',
+				'lastUpdated': time.asctime() # TODO
+			} for row in tables
+		]))
 
 	def ReportDetail(self, args):
 		return Response(content_type = 'application/json', body = json.dumps({ "todo": "Report detail" }))
@@ -37,11 +45,12 @@ class APIv1App(APIVersion):
 		# PyMySQLdb has no placeholders for table names :-(
 		if re.compile('^[a-zA-Z0-9_]+$').match(table_name):
 			try:
-				self.cursor.execute('SELECT * FROM ' + table_name + ';')
+				cursor = self.dbconn.cursor(cursors.DictCursor)
+				cursor.execute('SELECT * FROM ' + table_name + ';')
 			except:
 				# Don't leak information about the database
 				return webob.exc.HTTPNotFound()
-			return Response(content_type = 'application/json', body = json.dumps(self.cursor.fetchall()))
+			return Response(content_type = 'application/json', body = json.dumps(cursor.fetchall()))
 		return webob.exc.HTTPForbidden();
 
 def factory(global_config, **settings):
