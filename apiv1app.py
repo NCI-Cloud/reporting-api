@@ -3,8 +3,8 @@ from apiversion import APIVersion
 
 class APIv1App(APIVersion):
 
-	@staticmethod
-	def version_identifier():
+	@classmethod
+	def version_identifier(cls):
 		return "v1";
 
 	def respond(self):

@@ -9,7 +9,7 @@
     "schemes": [
         "http"
     ],
-    "basePath": "/",
+    "basePath": "/v1",
     "consumes": [
         "application/json",
         "text/xml"
@@ -19,37 +19,6 @@
         "text/xml"
     ],
     "definitions": {
-        "APIVersionLink": {
-            "description": "API version link",
-            "type": "object",
-            "properties": {
-                "href": {
-                    "description": "URL",
-                    "type": "string"
-                },
-                "rel": {
-                    "description": "Relation to the API version",
-                    "type": "string"
-                }
-            }
-        },
-        "APIVersion": {
-            "description": "A version of the API",
-            "type": "object",
-            "properties": {
-                "id": {
-                    "description": "Unique identifier for this version",
-                    "type": "string"
-                },
-                "links": {
-                    "description": "Array of links",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/APIVersionLink"
-                    }
-                }
-            }
-        },
         "ReportDetails": {
             "description": "Details of a report",
             "type": "object",
@@ -83,48 +52,14 @@
         }
     },
     "paths": {
-        "/": {
+        "/reports": {
+            "x-handler": "ReportsList",
             "get": {
-                "summary": "List API versions",
-                "description": "Returns a collection of available versions of the Reporting API.",
+                "summary": "Lists reports",
+                "description": "Returns a collection of available reports",
                 "responses": {
                     "200": {
-                        "description": "A collection of API versions",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/APIVersion"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/reports": {
-            "get": {
-                "summary": "List reports",
-                "description": "Returns a collection of names of available reports.",
-                "responses": {
-                    "200": {
-                        "description": "A collection of available report names.",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string",
-                                "description": "Report name"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/reports_detail": {
-            "get": {
-                "summary": "List reports with additional detail",
-                "description": "Returns a collection of available reports, with detailed information on each report.",
-                "responses": {
-                    "200": {
-                        "description": "A collection of available reports, with detailed information on each report.",
+                        "description": "A collection of available reports",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -135,19 +70,20 @@
                 }
             }
         },
-        "/v1/reports/{report}": {
+        "/reports/{report}": {
+            "x-handler": "ReportDetail",
+            "parameters": [
+                {
+                    "description": "Name of report",
+                    "name": "report",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
             "get": {
                 "summary": "Get report detail",
                 "description": "Detailed information about a report",
-                "parameters": [
-                    {
-                        "name": "report",
-                        "in": "path",
-                        "description": "Name of report",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Detailed information about the requested report",
@@ -158,7 +94,8 @@
                 }
             }
         },
-        "/v1/reports/{report}/data": {
+        "/reports/{report}/resultset": {
+            "x-handler": "ReportResultSet",
             "get": {
                 "summary": "Get report result set",
                 "description": "Retrieve a result set from the given report",

@@ -1,0 +1,74 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "0.1.0",
+        "title": "OpenStack Reporting Versions API",
+        "description": "A RESTful interface to a collection of versions of the reporting API."
+    },
+    "host": "130.56.242.65:9494",
+    "schemes": [
+        "http"
+    ],
+    "consumes": [
+        "application/json",
+        "text/xml"
+    ],
+    "produces": [
+        "application/json",
+        "text/xml"
+    ],
+    "definitions": {
+        "APIVersionLink": {
+            "description": "API version link",
+            "type": "object",
+            "properties": {
+                "href": {
+                    "description": "URL",
+                    "type": "string",
+                    "format": "url"
+                },
+                "rel": {
+                    "description": "Relation to the API version",
+                    "type": "string"
+                }
+            }
+        },
+        "APIVersion": {
+            "description": "A version of the API",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Unique identifier for this version",
+                    "type": "string"
+                },
+                "links": {
+                    "description": "Array of links",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/APIVersionLink"
+                    }
+                }
+            }
+        }
+    },
+    "paths": {
+        "/": {
+            "x-handler": "APIVersionList",
+            "get": {
+                "summary": "List API versions",
+                "description": "Returns a collection of available versions of the Reporting API.",
+                "responses": {
+                    "300": {
+                        "description": "A collection of API versions",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/APIVersion"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

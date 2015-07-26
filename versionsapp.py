@@ -1,8 +1,11 @@
 import json
 from apiversion import APIVersion
 from application import Application
+from apiv1app import APIv1App
 
 class VersionsApp(Application):
+
+	version_classes = [ APIv1App ]
 
 	def respond(self):
 		return [
@@ -14,7 +17,7 @@ class VersionsApp(Application):
 						"rel": "self"
 					}
 				]
-			} for version in APIVersion.__subclasses__()
+			} for version in self.version_classes
 		]
 
 def factory(global_config, **settings):
