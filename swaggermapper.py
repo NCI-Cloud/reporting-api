@@ -53,10 +53,6 @@ class SwaggerMapper(Mapper):
 			return result[0], result[1]
 		return super(SwaggerMapper, self).routematch(url, environ)
 
-class SwaggerMiddleware(RoutesMiddleware):
-	def __call__(self, environ, start_response):
-		return super(SwaggerMiddleware, self).__call__(environ, start_response)
-
 def factory(config, **settings):
 	def filter(app):
 		config.update(settings);
