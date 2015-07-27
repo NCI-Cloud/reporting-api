@@ -1,6 +1,5 @@
 import time
 import re
-import json
 import ConfigParser
 import MySQLdb
 from MySQLdb import cursors
@@ -50,7 +49,7 @@ class APIv1App(APIVersion):
 		cursor = self.dbconn.cursor(cursors.Cursor)
 		cursor.execute('SHOW TABLES;')
 		rows = cursor.fetchall()
-		return Response(content_type = 'application/json', body = json.dumps([
+		return Response(content_type = 'application/json', body = self._resultset_to_json([
 			{
 				'name': row[0],
 				'description': self._get_table_comment(row[0]),
@@ -60,7 +59,7 @@ class APIv1App(APIVersion):
 
 	def ReportDetail(self, args):
 		table_name = args['report']
-		return Response(content_type = 'application/json', body = json.dumps({
+		return Response(content_type = 'application/json', body = self._resultset_to_json({
 			'name': table_name,
 			'description': self._get_table_comment(table_name),
 				'lastUpdated': time.asctime() # TODO
@@ -75,7 +74,7 @@ class APIv1App(APIVersion):
 			except:
 				# Don't leak information about the database
 				return webob.exc.HTTPNotFound()
-			return Response(content_type = 'application/json', body = json.dumps(cursor.fetchall()))
+			return Response(content_type = 'application/json', body = self._resultset_to_json(cursor.fetchall()))
 		return webob.exc.HTTPForbidden()
 
 def factory(global_config, **settings):

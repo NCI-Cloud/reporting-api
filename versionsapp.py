@@ -1,4 +1,3 @@
-import json
 from webob import Response
 from apiversion import APIVersion
 from application import Application
@@ -9,7 +8,7 @@ class VersionsApp(Application):
 	version_classes = [ APIv1App ]
 
 	def APIVersionList(self, args):
-		return Response(content_type = 'application/json', body = json.dumps([
+		return Response(content_type = 'application/json', body = self._resultset_to_json([
 			{
 				"id": version._version_identifier(),
 				"links": [
@@ -22,7 +21,7 @@ class VersionsApp(Application):
 		]))
 
 	def APIVersion(self, args):
-		return Response(content_type = 'application/json', body = json.dumps({
+		return Response(content_type = 'application/json', body = self._resultset_to_json({
 			'todo': 'Report detail'
 		}))
 
