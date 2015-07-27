@@ -72,6 +72,15 @@
         },
         "/{version}": {
             "x-handler": "APIVersion",
+            "parameters": [
+                {
+                    "description": "API version identifier",
+                    "name": "version",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
             "get": {
                 "summary": "API version detail",
                 "description": "Returns detail of one available version of the Reporting API.",
