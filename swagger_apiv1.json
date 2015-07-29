@@ -53,10 +53,10 @@
     },
     "paths": {
         "/reports": {
-            "x-handler": "ReportsList",
             "get": {
                 "summary": "Lists reports",
                 "description": "Returns a collection of available reports",
+                "operationId": "ReportsList",
                 "responses": {
                     "200": {
                         "description": "A collection of available reports",
@@ -71,7 +71,6 @@
             }
         },
         "/reports/{report}": {
-            "x-handler": "ReportDetail",
             "parameters": [
                 {
                     "description": "Name of report",
@@ -84,6 +83,7 @@
             "get": {
                 "summary": "Get report detail",
                 "description": "Detailed information about a report",
+                "operationId": "ReportDetail",
                 "responses": {
                     "200": {
                         "description": "Detailed information about the requested report",
@@ -95,10 +95,10 @@
             }
         },
         "/reports/{report}/resultset": {
-            "x-handler": "ReportResultSet",
             "get": {
                 "summary": "Get report result set",
                 "description": "Retrieve a result set from the given report",
+                "operationId": "ReportResultSet",
                 "parameters": [
                     {
                         "name": "report",

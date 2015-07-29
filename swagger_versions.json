@@ -53,10 +53,10 @@
     },
     "paths": {
         "/": {
-            "x-handler": "APIVersionList",
             "get": {
                 "summary": "List API versions",
                 "description": "Returns a collection of available versions of the Reporting API.",
+                "operationId": "APIVersionList",
                 "responses": {
                     "300": {
                         "description": "A collection of API versions",
@@ -71,7 +71,6 @@
             }
         },
         "/{version}": {
-            "x-handler": "APIVersion",
             "parameters": [
                 {
                     "description": "API version identifier",
@@ -84,6 +83,7 @@
             "get": {
                 "summary": "API version detail",
                 "description": "Returns detail of one available version of the Reporting API.",
+                "operationId": "APIVersion",
                 "responses": {
                     "200": {
                         "description": "A collection of API versions",

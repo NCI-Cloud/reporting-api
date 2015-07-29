@@ -33,17 +33,18 @@ class SwaggerMapper(Mapper):
 		for path, pathdef in swagger_spec['paths'].items():
 			"""
 			NOTE: Use of mapper.collection rather than mapper.connect below
-			would make the controller implicit, rather than extending
-			the Swagger schema with x-handler attributes.
+			would make the controller implicit, rather than using
+			Swagger schema operationId attributes.
 			However, doing so would impose additional structure on the API,
 			limiting the generality of Swagger and this class.
 			"""
-			if 'x-handler' in pathdef:
-				handler_name = pathdef['x-handler']
-				methods = [ method.upper() for method in self.swagger_methods if method.lower() in pathdef ]
-				super(SwaggerMapper, self).connect(handler_name, base_path + path, method=handler_name, conditions=dict(method=methods))
-			else:
-				raise ValueError("No x-handler attribute for path '%s'" % path)
+			methods = [ method for method in self.swagger_methods if method in pathdef ]
+			for method in methods:
+				if 'operationId' in pathdef[method]:
+					handler_name = pathdef[method]['operationId']
+					super(SwaggerMapper, self).connect(handler_name, base_path + path, method=handler_name, conditions=dict(method=method.upper()))
+				else:
+					raise ValueError("No operationId attribute for method '%s' in path '%s'" % (method, path))
 		self.redirect('', '/');
 
 	def routematch(self, url = None, environ = None):
