@@ -45,6 +45,18 @@ class APIv1App(APIVersion):
 	def _get_table_comment(self, table_name):
 		return self._get_tables_comments([ table_name ])[0]
 
+	def _get_table_lastupdates(self, table_names):
+		cursor = self.dbconn.cursor(cursors.Cursor)
+		for table_name in table_names:
+			if not self._sate_table_name(table_name):
+				return webob.exc.HTTPForbidden()
+		cursor.execute("SELECT ts FROM metadata WHERE table_name IN ('" + "','".join(table_names) + "');")
+		rows = cursor.fetchall()
+		return [ row[0] for row in rows]
+
+	def _get_table_lastupdate(self, table_name):
+		return self._get_table_lastupdates([ table_name ])[0]
+
 	def ReportsList(self, args):
 		cursor = self.dbconn.cursor(cursors.Cursor)
 		cursor.execute('SHOW TABLES;')
@@ -53,7 +65,7 @@ class APIv1App(APIVersion):
 			{
 				'name': row[0],
 				'description': self._get_table_comment(row[0]),
-				'lastUpdated': time.asctime() # TODO
+				'lastUpdated': self._get_table_lastupdate(row[0])
 			} for row in rows
 		]))
 
@@ -62,7 +74,7 @@ class APIv1App(APIVersion):
 		return Response(content_type = 'application/json', body = self._resultset_to_json({
 			'name': table_name,
 			'description': self._get_table_comment(table_name),
-				'lastUpdated': time.asctime() # TODO
+				'lastUpdated': self._get_table_lastupdate(table_name)
 		}))
 
 	def ReportResultSet(self, args):
@@ -70,6 +82,7 @@ class APIv1App(APIVersion):
 		if self._safe_table_name(table_name):
 			try:
 				cursor = self.dbconn.cursor(cursors.DictCursor)
+				cursor.execute('CALL ' + table_name + '_update();')
 				cursor.execute('SELECT * FROM ' + table_name + ';')
 			except:
 				# Don't leak information about the database
