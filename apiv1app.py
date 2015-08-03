@@ -48,7 +48,7 @@ class APIv1App(APIVersion):
 	def _get_table_lastupdates(self, table_names):
 		cursor = self.dbconn.cursor(cursors.Cursor)
 		for table_name in table_names:
-			if not self._sate_table_name(table_name):
+			if not self._safe_table_name(table_name):
 				return webob.exc.HTTPForbidden()
 		cursor.execute("SELECT ts FROM metadata WHERE table_name IN ('" + "','".join(table_names) + "');")
 		rows = cursor.fetchall()
