@@ -1,4 +1,5 @@
 import time
+from datetime import datetime
 import re
 import ConfigParser
 import MySQLdb
@@ -51,11 +52,13 @@ class APIv1App(APIVersion):
 			if not self._safe_table_name(table_name):
 				return webob.exc.HTTPForbidden()
 		cursor.execute("SELECT ts FROM metadata WHERE table_name IN ('" + "','".join(table_names) + "');")
-		rows = cursor.fetchall()
-		return [ row[0] for row in rows]
+		return [ row[0] for row in cursor.fetchall() ]
 
 	def _get_table_lastupdate(self, table_name):
-		return self._get_table_lastupdates([ table_name ])[0]
+		rows = self._get_table_lastupdates([ table_name ])
+		if rows:
+			return rows[0]
+		return datetime.fromtimestamp(0).isoformat()
 
 	def ReportsList(self, args):
 		cursor = self.dbconn.cursor(cursors.Cursor)
