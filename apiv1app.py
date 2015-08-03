@@ -83,9 +83,12 @@ class APIv1App(APIVersion):
 	def ReportResultSet(self, args):
 		table_name = args['report']
 		if self._safe_table_name(table_name):
+			cursor = self.dbconn.cursor(cursors.DictCursor)
 			try:
-				cursor = self.dbconn.cursor(cursors.DictCursor)
 				cursor.execute('CALL ' + table_name + '_update();')
+			except:
+				pass # Can't refresh the report. Degrade gracefully by serving old data.
+			try:
 				cursor.execute('SELECT * FROM ' + table_name + ';')
 			except:
 				# Don't leak information about the database
