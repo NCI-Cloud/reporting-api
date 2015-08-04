@@ -2,7 +2,7 @@ from webob import Response
 import webob.exc
 from apiversion import APIVersion
 from application import Application
-from apiv1app import APIv1App
+from app.apiv1 import APIv1App
 
 class VersionsApp(Application):
 
