@@ -6,7 +6,7 @@ import MySQLdb
 from MySQLdb import cursors
 from webob import Response
 import webob.exc
-from apiversion import APIVersion
+from common.apiversion import APIVersion
 
 class APIv1App(APIVersion):
 
