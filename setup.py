@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 def read(*paths):
 	"""Build a file path from *paths* and return the contents."""
 	with open(os.path.join(*paths), 'r') as f:
-	return f.read()
+		return f.read()
 
 setup(
 	name='reporting-api',
