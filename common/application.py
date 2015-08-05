@@ -31,7 +31,7 @@ class Application(object):
 						return webob.exc.HTTPForbidden()
 					method = self._get_method(method_name)
 					if method is None:
-						# Method specified in interface specification, but not matching Python method found
+						# Method specified in interface specification, but no matching Python method found
 						return webob.exc.HTTPNotImplemented()
 					return method(routing_args[1])
 		return webob.exc.HTTPNotFound()
