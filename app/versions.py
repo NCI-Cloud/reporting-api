@@ -9,15 +9,15 @@ class VersionsApp(Application):
 	version_classes = [ APIv1App ]
 
 	def _api_version_detail(self, version):
-		return {
-			"id": version._version_identifier(),
-			"links": [
-				{
-					"href": "/" + version._version_identifier(),
-					"rel": "self"
-				}
+		return dict(
+			id = version._version_identifier(),
+			links = [
+				dict(
+					href = "/" + version._version_identifier(),
+					rel = "self"
+				)
 			]
-		}
+		)
 
 	def APIVersionList(self, args):
 		return Response(status = 300, content_type = 'application/json', body = self._resultset_to_json([
@@ -30,9 +30,9 @@ class VersionsApp(Application):
 			return webob.exc.HTTPNotFound()
 		if len(versions) > 1:
 			raise RuntimeError("Multiple API versions with identifier '%s'" % version_identifier)
-		return Response(content_type = 'application/json', body = self._resultset_to_json({
+		return Response(content_type = 'application/json', body = self._resultset_to_json(dict(
 			self._api_version_detail(versions[0])
-		}))
+		)))
 
 def factory(global_config, **settings):
 	return VersionsApp()
