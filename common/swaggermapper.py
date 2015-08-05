@@ -42,7 +42,8 @@ class SwaggerMapper(Mapper):
 			for method in methods:
 				if 'operationId' in pathdef[method]:
 					handler_name = pathdef[method]['operationId']
-					super(SwaggerMapper, self).connect(handler_name, base_path + path, method=handler_name, conditions=dict(method=method.upper()))
+					for suffix in [ '', '/' ]:
+						super(SwaggerMapper, self).connect(handler_name, base_path + path + suffix, method=handler_name, conditions=dict(method=method.upper()))
 				else:
 					raise ValueError("No operationId attribute for method '%s' in path '%s'" % (method, path))
 		self.redirect('', '/');
