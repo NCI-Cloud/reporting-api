@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import json
+import os
 from routes.middleware import RoutesMiddleware
 from routes import Mapper
 
@@ -65,6 +66,12 @@ def factory(config, **settings):
 	return filter
 
 if __name__ == '__main__':
-	spec = json.loads(open('swagger.json').read())
-	mapper = SwaggerMapper(spec)
-	print mapper
+	realfile = os.path.realpath(__file__)
+	realdir = os.path.dirname(realfile)
+	pardir = os.path.realpath(os.path.join(realdir, os.pardir))
+	confdir = os.path.join(pardir, 'conf')
+	specfiles = [ 'swagger_versions.json', 'swagger_apiv1.json' ]
+	specs = [ json.loads(open(os.path.join(confdir, specfile)).read()) for specfile in specfiles ]
+	for spec in specs:
+		mapper = SwaggerMapper(spec)
+		print mapper
