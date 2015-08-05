@@ -2,5 +2,8 @@
 
 script=$(readlink -f "$0")
 bindir=$(dirname "$script")
+pardir=$(readlink -f "$bindir/..")
+confdir="${pardir}/conf"
+log=/var/log/reporting-api.log
 
-PYTHONPATH="$bindir"/.. paster serve "$bindir/../conf/paste.config" --reload >> /var/log/reporting-api.log 2>&1
+PYTHONPATH="$pardir" paster serve "$confdir/paste.config" --reload >> "$log" 2>&1
