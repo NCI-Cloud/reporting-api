@@ -19,6 +19,9 @@ for url in $urls ; do
 	ret=$?
 	echo
 	if [ $ret -ne 0 ] ; then
-		break
+		echo "Error on URL '$url'" 1>&2
+		exit $?
 	fi
 done
+
+exit 0
