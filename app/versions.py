@@ -6,33 +6,20 @@ from app.apiv1 import APIv1App
 
 class VersionsApp(Application):
 
-	version_classes = [ APIv1App ]
-
-	def _api_version_detail(self, version):
-		return dict(
-			id = version._version_identifier(),
-			links = [
-				dict(
-					href = "/" + version._version_identifier(),
-					rel = "self"
-				)
-			]
-		)
-
 	def APIVersionList(self, args):
 		return Response(status = 300, content_type = 'application/json', body = self._resultset_to_json([
-			self._api_version_detail(version) for version in self.version_classes
+			version._api_version_detail() for version in APIVersion.version_classes
 		]))
 
-	def APIVersion(self, version_identifier):
-		versions = [ version for version in self.version_classes if version._version_identifier() == version_identifier ]
+	def APIVersionDetails(self, version_identifier):
+		versions = [ version for version in APIVersion.version_classes if version._version_identifier() == version_identifier ]
 		if not versions:
 			return webob.exc.HTTPNotFound()
 		if len(versions) > 1:
 			raise RuntimeError("Multiple API versions with identifier '%s'" % version_identifier)
-		return Response(content_type = 'application/json', body = self._resultset_to_json(dict(
-			self._api_version_detail(versions[0])
-		)))
+		return Response(content_type = 'application/json', body = self._resultset_to_json(
+			versions[0]._api_version_detail()
+		))
 
 def factory(global_config, **settings):
 	return VersionsApp()

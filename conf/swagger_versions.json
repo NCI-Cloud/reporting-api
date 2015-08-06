@@ -83,7 +83,7 @@
             "get": {
                 "summary": "API version detail",
                 "description": "Returns detail of one available version of the Reporting API.",
-                "operationId": "APIVersion",
+                "operationId": "APIVersionDetails",
                 "responses": {
                     "200": {
                         "description": "A collection of API versions",

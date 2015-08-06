@@ -4,7 +4,6 @@ import json
 from webob import Request, Response
 import webob.exc
 import webob.dec
-from app.hello import HelloApp
 
 class SwaggerMiddleware(object):
 
@@ -36,9 +35,15 @@ class SwaggerMiddleware(object):
 		# print "Match: '%s' '%s'" % (url, pattern)
 		return [ True, path_parameters ]
 
-	def _find_path(self, environ):
-		for path, pathdef in self.spec['paths'].items():
-			[ matched, parameters ] = self._path_matches(path, environ['PATH_INFO'])
+	def _find_path(self, environ, spec):
+		if 'basePath' in spec:
+			base_path = spec['basePath']
+		else:
+			base_path = ''
+		for path, pathdef in spec['paths'].items():
+			# print "BasePath: '%s'" % base_path
+			url = environ['SCRIPT_NAME'] + environ['PATH_INFO']
+			[ matched, parameters ] = self._path_matches(base_path + path, url)
 			if matched:
 				return [ pathdef, parameters ]
 			"""
@@ -67,37 +72,41 @@ class SwaggerMiddleware(object):
 			return json.dumps(pathdef)
 		return json.dumps(dict())
 
-	def __init__(self, application, spec, cfg=None, **kw):
-		self.spec = spec
+	def __init__(self, application, specs, cfg=None, **kw):
+		self.specs = specs
 		self.application = application
 
 	def __call__(self, environ, start_response):
-		# print environ['PATH_INFO']
-		# print environ['SCRIPT_NAME']
-		# print self.spec
-		if ('SCRIPT_PATH' in environ) and ('basePath' in self.spec):
-			if not environ['SCRIPT_NAME'].startswith(self.spec['basePath']):
-				return webob.exc.HTTPNotFound()
-		data = dict()
-		[ pathdef, path_parameters ] = self._find_path(environ)
-		# Handle OPTIONS requests ourselves, since we know the methods allowed
-		if "options" == environ['REQUEST_METHOD'].lower():
-			return self._options_response(pathdef, path_parameters, environ, start_response)
-		if pathdef:
-			data['path'] = pathdef
-			data['parameters'] = path_parameters
-			oper = self._find_operation(pathdef, environ)
-			if oper:
-				data['operation'] = oper
-		environ['swagger'] = data
+		# print "PATH_INFO: " + environ['PATH_INFO']
+		# print "SCRIPT_NAME: " + environ['SCRIPT_NAME']
+		# print self.specs
+		for spec in self.specs:
+			"""
+			if ('SCRIPT_NAME' in environ) and ('basePath' in spec):
+				if not environ['SCRIPT_NAME'].startswith(spec['basePath']):
+					return webob.exc.HTTPNotFound()
+			"""
+			data = dict()
+			[ pathdef, path_parameters ] = self._find_path(environ, spec)
+			# Handle OPTIONS requests ourselves, since we know the methods allowed
+			if "options" == environ['REQUEST_METHOD'].lower():
+				return self._options_response(pathdef, path_parameters, environ, start_response)
+			if pathdef:
+				data['path'] = pathdef
+				data['parameters'] = path_parameters
+				oper = self._find_operation(pathdef, environ)
+				if oper:
+					data['operation'] = oper
+				environ['swagger'] = data
+				return self.application(environ, start_response)
 		return self.application(environ, start_response)
 
 def factory(config, **settings):
 	def filter(app):
 		config.update(settings)
-		swagger_file = config.get('swagger_json', 'swagger.json');
-		spec = json.loads(open(swagger_file).read())
-		return SwaggerMiddleware(app, spec)
+		swagger_files = config.get('swagger_json', 'swagger.json');
+		specs = [ json.loads(open(file).read()) for file in swagger_files.split() ]
+		return SwaggerMiddleware(app, specs)
 	return filter
 
 if __name__ == '__main__':

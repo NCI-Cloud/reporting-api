@@ -96,6 +96,8 @@ class APIv1App(APIVersion):
 			return Response(content_type = 'application/json', body = self._resultset_to_json(cursor.fetchall()))
 		return webob.exc.HTTPForbidden()
 
+APIVersion.version_classes.append(APIv1App)
+
 def factory(global_config, **settings):
 	global_config.update(settings)
 	config_file = global_config.get('config_file', 'apiv1app.ini')

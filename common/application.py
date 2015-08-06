@@ -1,5 +1,6 @@
 import json
 from webob import Request, Response
+import abc
 import webob.dec
 import webob.exc
 
@@ -8,6 +9,7 @@ class Application(object):
 	def _get_method(self, func_name):
 		return getattr(self, func_name, None)
 
+	@classmethod
 	def _resultset_to_json(self, resultset):
 		def handler(obj):
 			if hasattr(obj, 'isoformat'):
@@ -41,5 +43,6 @@ class Application(object):
 		method = self._get_method(method_name)
 		if method is None:
 			# Method specified in interface specification, but no matching Python method found
+			print self.__class__.__name__ + " has no method '%s'" % method_name
 			return webob.exc.HTTPNotImplemented()
 		return method(swagger['parameters'])
