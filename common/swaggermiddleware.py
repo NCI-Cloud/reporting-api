@@ -12,6 +12,7 @@ class SwaggerMiddleware(object):
 	swagger_methods = [ 'get', 'put', 'post', 'delete', 'options', 'head', 'patch' ]
 
 	def _path_matches(self, pattern, url):
+		# print "Testing: '%s' '%s'" % (url, pattern)
 		path_parameters = dict()
 		pattern_components = pattern.split('/')
 		url_components = url.split('/')
@@ -40,6 +41,11 @@ class SwaggerMiddleware(object):
 			[ matched, parameters ] = self._path_matches(path, environ['PATH_INFO'])
 			if matched:
 				return [ pathdef, parameters ]
+			"""
+			else:
+				print "Rejected path:"
+				print path
+			"""
 		return [ None, None ]
 
 	def _find_operation(self, pathdef, environ):
@@ -66,6 +72,9 @@ class SwaggerMiddleware(object):
 		self.application = application
 
 	def __call__(self, environ, start_response):
+		# print environ['PATH_INFO']
+		# print environ['SCRIPT_NAME']
+		# print self.spec
 		if ('SCRIPT_PATH' in environ) and ('basePath' in self.spec):
 			if not environ['SCRIPT_NAME'].startswith(self.spec['basePath']):
 				return webob.exc.HTTPNotFound()
