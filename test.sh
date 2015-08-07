@@ -1,6 +1,9 @@
 #!/bin/sh
 
-ip=$(ip a|egrep 'inet[^6]'|fgrep -v 127.0.0.1|sed -r -e 's/.*inet ([0-9.]+).*/\1/g'|head -1)
+ip=$(cat conf/paste.config | egrep '^ *host *= *([^ ]+) *$' | sed -r -e 's/^ *host *= *([^ ]+) *$/\1/')
+if test -z "$ip" ; then
+       ip=$(ip a|egrep 'inet[^6]'|fgrep -v 127.0.0.1|sed -r -e 's/.*inet ([0-9.]+).*/\1/g'|head -1)
+fi
 
 urls="\
 http://${ip}:9494/v1/reports/projects/resultset/ \
