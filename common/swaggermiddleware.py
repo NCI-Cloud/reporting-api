@@ -88,16 +88,15 @@ class SwaggerMiddleware(object):
 			"""
 			data = dict()
 			[ pathdef, path_parameters ] = self._find_path(environ, spec)
-			# Handle OPTIONS requests ourselves, since we know the methods allowed
-			if "options" == environ['REQUEST_METHOD'].lower():
-				return self._options_response(pathdef, path_parameters, environ, start_response)
-			if pathdef:
+			if pathdef is not None:
 				data['path'] = pathdef
 				data['parameters'] = path_parameters
-				oper = self._find_operation(pathdef, environ)
-				if oper:
-					data['operation'] = oper
+				data['operation'] = self._find_operation(pathdef, environ)
 				environ['swagger'] = data
+				# Handle OPTIONS requests ourselves, since we know the methods allowed
+				if "options" == environ['REQUEST_METHOD'].lower():
+					return self._options_response(pathdef, path_parameters, environ, start_response)
+				# elif pathdef is not None:
 				return self.application(environ, start_response)
 		return self.application(environ, start_response)
 
