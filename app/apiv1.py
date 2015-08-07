@@ -35,6 +35,7 @@ class APIv1App(APIVersion):
 		return False
 
 	def _get_tables_comments(self, table_names):
+		self.dbconn.ping(True)
 		cursor = self.dbconn.cursor(cursors.Cursor)
 		for table_name in table_names:
 			if not self._safe_table_name(table_name):
@@ -47,6 +48,7 @@ class APIv1App(APIVersion):
 		return self._get_tables_comments([ table_name ])[0]
 
 	def _get_table_lastupdates(self, table_names):
+		self.dbconn.ping(True)
 		cursor = self.dbconn.cursor(cursors.Cursor)
 		for table_name in table_names:
 			if not self._safe_table_name(table_name):
@@ -61,6 +63,7 @@ class APIv1App(APIVersion):
 		return datetime.fromtimestamp(0).isoformat()
 
 	def ReportsList(self, args):
+		self.dbconn.ping(True)
 		cursor = self.dbconn.cursor(cursors.Cursor)
 		cursor.execute('SHOW TABLES;')
 		rows = cursor.fetchall()
@@ -83,6 +86,7 @@ class APIv1App(APIVersion):
 	def ReportResultSet(self, args):
 		table_name = args['report']
 		if self._safe_table_name(table_name):
+			self.dbconn.ping(True)
 			cursor = self.dbconn.cursor(cursors.DictCursor)
 			try:
 				cursor.execute('CALL ' + table_name + '_update();')
