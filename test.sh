@@ -16,12 +16,20 @@ http://${ip}:9494 \
 "
 
 for url in $urls ; do
-	echo "$url"
+	echo "OPTIONS $url"
+	curl -X OPTIONS "$url"
+	ret=$?
+	echo
+	if [ $ret -ne 0 ] ; then
+		echo "Error on OPTIONS of URL '$url'" 1>&2
+		exit $?
+	fi
+	echo "GET $url"
 	curl "$url"
 	ret=$?
 	echo
 	if [ $ret -ne 0 ] ; then
-		echo "Error on URL '$url'" 1>&2
+		echo "Error on GET of URL '$url'" 1>&2
 		exit $?
 	fi
 done
