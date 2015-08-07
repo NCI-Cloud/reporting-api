@@ -1,16 +1,18 @@
 #!/bin/sh
 
+ip=$(ip a|egrep 'inet[^6]'|fgrep -v 127.0.0.1|sed -r -e 's/.*inet ([0-9.]+).*/\1/g'|head -1)
+
 urls="\
-http://10.0.7.117:9494/v1/reports/projects/resultset/ \
-http://10.0.7.117:9494/v1/reports/projects/resultset \
-http://10.0.7.117:9494/v1/reports/projects/ \
-http://10.0.7.117:9494/v1/reports/projects \
-http://10.0.7.117:9494/v1/reports/ \
-http://10.0.7.117:9494/v1/reports \
-http://10.0.7.117:9494/v1/ \
-http://10.0.7.117:9494/v1 \
-http://10.0.7.117:9494/ \
-http://10.0.7.117:9494 \
+http://${ip}:9494/v1/reports/projects/resultset/ \
+http://${ip}:9494/v1/reports/projects/resultset \
+http://${ip}:9494/v1/reports/projects/ \
+http://${ip}:9494/v1/reports/projects \
+http://${ip}:9494/v1/reports/ \
+http://${ip}:9494/v1/reports \
+http://${ip}:9494/v1/ \
+http://${ip}:9494/v1 \
+http://${ip}:9494/ \
+http://${ip}:9494 \
 "
 
 for url in $urls ; do
