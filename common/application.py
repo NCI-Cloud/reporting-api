@@ -23,20 +23,33 @@ class Application(object):
 	@webob.dec.wsgify
 	def __call__(self, req_dict):
 		req = Request(req_dict.environ)
-		if not('swagger' in req.environ):
-			print "No swagger in environment"
+		if 'wsgiorg.routing_args' in req.environ:
+			routing_args = req.environ['wsgiorg.routing_args']
+			method_params = routing_args[1]
+			if method_params:
+				method_name = method_params['method']
+			else:
+				return webob.exc.HTTPNotFound()
+			swagger = None
+		elif 'swagger' in req.environ:
+			swagger = req.environ['swagger']
+			# print swagger
+			if not ('operation' in swagger):
+				print "No operation"
+				return webob.exc.HTTPNotFound()
+			operation = swagger['operation']
+			if not ('operationId' in operation):
+				print "No operationId"
+				return webob.exc.HTTPNotFound()
+			method_name = operation['operationId']
+			if 'parameters' in swagger:
+				method_params = swagger['parameters']
+			else:
+				method_params = dict()
+		else:
+			print "Neither wsgiorg.routing_args nor swagger in environment"
 			return webob.exc.HTTPNotFound()
-		swagger = req.environ['swagger']
-		# print swagger
-		if not ('operation' in swagger):
-			print "No operation"
-			print swagger
-			return webob.exc.HTTPNotFound()
-		operation = swagger['operation']
-		if not ('operationId' in operation):
-			print "No operationId"
-			return webob.exc.HTTPNotFound()
-		method_name = operation['operationId']
+			print req.environ
 		if method_name.startswith('_'):
 			# Attempt to call a private method
 			return webob.exc.HTTPForbidden()
@@ -45,4 +58,6 @@ class Application(object):
 			# Method specified in interface specification, but no matching Python method found
 			print self.__class__.__name__ + " has no method '%s'" % method_name
 			return webob.exc.HTTPNotImplemented()
-		return method(swagger['parameters'])
+		if swagger:
+			return method(swagger['parameters'])
+		return method(req.environ['wsgiorg.routing_args'][1])

@@ -8,13 +8,13 @@ from routes import Mapper
 class SwaggerMapper(Mapper):
 	"""
 	A WSGI URL router middleware that automatically configures itself
-	using a Swagger JSON API specification.
+	using a set of Swagger JSON API specifications.
 	"""
 
 	# The Swagger specification v2.0 mandates use of only these methods
 	swagger_methods = [ 'get', 'put', 'post', 'delete', 'options', 'head', 'patch' ]
 
-	def __init__(self, swagger_spec):
+	def __init__(self, swagger_specs):
 		super(SwaggerMapper, self).__init__();
 		"""
 		To debug this Mapper:
@@ -22,6 +22,10 @@ class SwaggerMapper(Mapper):
 		logger = logging.getLogger('routes.middleware')
 		logger.setLevel(logging.DEBUG)
 		"""
+		for spec in swagger_specs:
+			self._read_spec(spec)
+
+	def _read_spec(self, swagger_spec):
 		"""
 		FIXME: This breaks matching for apps whose Paste configuration
 		has them served from a URL other than the root '/'.
@@ -39,14 +43,20 @@ class SwaggerMapper(Mapper):
 			However, doing so would impose additional structure on the API,
 			limiting the generality of Swagger and this class.
 			"""
-			methods = [ method for method in self.swagger_methods if method in pathdef ]
+			methods = [ method for method in self.swagger_methods if method != 'options' and method in pathdef ]
 			for method in methods:
-				if 'operationId' in pathdef[method]:
-					handler_name = pathdef[method]['operationId']
+				methoddef = pathdef[method]
+				if 'operationId' in methoddef:
+					handler_name = methoddef['operationId']
 					for suffix in [ '', '/' ]:
 						super(SwaggerMapper, self).connect(handler_name, base_path + path + suffix, method=handler_name, conditions=dict(method=method.upper()))
 				else:
 					raise ValueError("No operationId attribute for method '%s' in path '%s'" % (method, path))
+			"""
+			TODO: Synthesise an OPTIONS response
+			for suffix in [ '', '/' ]:
+				super(SwaggerMapper, self).connect('OPTIONS_' + '_'.join(base_path, path, suffix).replace('/', '_'), base_path + path + suffix, method='options', conditions=dict(method='OPTIONS'))
+			"""
 		self.redirect('', '/');
 
 	def routematch(self, url = None, environ = None):
@@ -59,9 +69,9 @@ class SwaggerMapper(Mapper):
 def factory(config, **settings):
 	def filter(app):
 		config.update(settings);
-		swagger_file = config.get('swagger_json', 'swagger.json');
-		spec = json.loads(open(swagger_file).read())
-		mapper = SwaggerMapper(spec)
+		swagger_files = config.get('swagger_json', 'swagger.json');
+		specs = [ json.loads(open(file).read()) for file in swagger_files.split() ]
+		mapper = SwaggerMapper(specs)
 		return RoutesMiddleware(app, mapper)
 	return filter
 
@@ -72,6 +82,5 @@ if __name__ == '__main__':
 	confdir = os.path.join(pardir, 'conf')
 	specfiles = [ 'swagger_versions.json', 'swagger_apiv1.json' ]
 	specs = [ json.loads(open(os.path.join(confdir, specfile)).read()) for specfile in specfiles ]
-	for spec in specs:
-		mapper = SwaggerMapper(spec)
-		print mapper
+	mapper = SwaggerMapper(specs)
+	print mapper

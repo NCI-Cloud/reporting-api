@@ -29,3 +29,9 @@ class APIVersion(Application):
 		return Response(content_type = 'application/json', body = cls._resultset_to_json(
 			cls._api_version_detail()
 		))
+
+	@classmethod
+	def APIVersionList(cls, args):
+		return Response(status = 300, content_type = 'application/json', body = cls._resultset_to_json(
+			[ version._api_version_detail() for version in APIVersion.version_classes ]
+		))

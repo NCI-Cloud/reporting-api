@@ -80,25 +80,26 @@ class APIv1App(APIVersion):
 		return Response(content_type = 'application/json', body = self._resultset_to_json({
 			'name': table_name,
 			'description': self._get_table_comment(table_name),
-				'lastUpdated': self._get_table_lastupdate(table_name)
+			'lastUpdated': self._get_table_lastupdate(table_name)
 		}))
 
 	def ReportResultSet(self, args):
 		table_name = args['report']
-		if self._safe_table_name(table_name):
-			self.dbconn.ping(True)
-			cursor = self.dbconn.cursor(cursors.DictCursor)
-			try:
-				cursor.execute('CALL ' + table_name + '_update();')
-			except:
-				pass # Can't refresh the report. Degrade gracefully by serving old data.
-			try:
-				cursor.execute('SELECT * FROM ' + table_name + ';')
-			except:
-				# Don't leak information about the database
-				return webob.exc.HTTPNotFound()
-			return Response(content_type = 'application/json', body = self._resultset_to_json(cursor.fetchall()))
-		return webob.exc.HTTPForbidden()
+		if not self._safe_table_name(table_name):
+			return webob.exc.HTTPForbidden()
+		self.dbconn.ping(True)
+		cursor = self.dbconn.cursor(cursors.DictCursor)
+		try:
+			cursor.execute('CALL ' + table_name + '_update();')
+		except:
+			# Can't refresh the report. Degrade gracefully by serving old data.
+			pass
+		try:
+			cursor.execute('SELECT * FROM ' + table_name + ';')
+		except:
+			# Don't leak information about the database
+			return webob.exc.HTTPNotFound()
+		return Response(content_type = 'application/json', body = self._resultset_to_json(cursor.fetchall()))
 
 APIVersion.version_classes.append(APIv1App)
 
