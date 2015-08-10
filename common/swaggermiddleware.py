@@ -5,7 +5,6 @@ from webob import Request, Response
 import webob.exc
 import webob.dec
 from common.application import Application
-from saml2.schema.soap import Operation
 
 class SwaggerMiddleware(object):
 
