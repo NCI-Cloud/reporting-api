@@ -13,6 +13,8 @@ class APIv1App(APIVersion):
 	def __init__(self, config_file):
 		self.config = config_file
 		self.dbname = self.config.get('database', 'dbname')
+		if not self._safe_table_name(self.dbname):
+			raise ValueError('DB name not also a valid table name, assumed unsafe')
 		self.dbconn = MySQLdb.connect(
 			host = self.config.get('database', 'hostname'),
 			user = self.config.get('database', 'username'),
@@ -60,7 +62,7 @@ class APIv1App(APIVersion):
 		rows = self._get_table_lastupdates([ table_name ])
 		if rows:
 			return rows[0]
-		return datetime.fromtimestamp(0).isoformat()
+		return datetime.utcfromtimestamp(0).isoformat()
 
 	def _get_report_details(self, report_name):
 		return dict({
