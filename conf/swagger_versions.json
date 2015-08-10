@@ -86,7 +86,7 @@
                 "operationId": "APIVersionDetails",
                 "responses": {
                     "200": {
-                        "description": "A collection of API versions",
+                        "description": "Details of the given API version",
                         "schema": {
                           "$ref": "#/definitions/APIVersion"
                         }

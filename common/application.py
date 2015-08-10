@@ -3,6 +3,7 @@ from webob import Request, Response
 import abc
 import webob.dec
 import webob.exc
+import wsgiref
 
 class Application(object):
 
@@ -61,4 +62,4 @@ class Application(object):
 			# Method specified in interface specification, but no matching Python method found
 			print self.__class__.__name__ + " has no method '%s'" % method_name
 			return webob.exc.HTTPNotImplemented()
-		return method(method_params)
+		return method(req, method_params)

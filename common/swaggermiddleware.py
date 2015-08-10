@@ -5,6 +5,7 @@ from webob import Request, Response
 import webob.exc
 import webob.dec
 from common.application import Application
+from saml2.schema.soap import Operation
 
 class SwaggerMiddleware(object):
 
@@ -73,18 +74,23 @@ class SwaggerMiddleware(object):
 	def _options_response(self, environ, start_response):
 		swagger = environ['swagger']
 		pathdef = swagger['path']
-		if pathdef:
-			methods = [ method.upper() for method in self.swagger_methods if method != 'options' and method in pathdef ]
-		else:
+		operation = swagger['operation']
+		if pathdef is None:
 			methods = []
+		else:
+			methods = [ method.upper() for method in self.swagger_methods if method != 'options' and method in pathdef ]
 		# Synthesise an OPTIONS method
 		methods.append('OPTIONS')
 		headers = []
 		headers.append(('Allow', ','.join(methods)))
 		start_response('200 OK', headers)
-		if pathdef:
-			return Application._resultset_to_json(pathdef)
-		return Application._resultset_to_json(dict())
+		if operation is not None:
+			result = operation
+		elif pathdef is not None:
+			result = pathdef
+		else:
+			result = dict()
+		return Application._resultset_to_json(result)
 
 	def __init__(self, application, specs, cfg=None, **kw):
 		self.specs = specs

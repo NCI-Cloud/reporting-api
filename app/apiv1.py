@@ -26,6 +26,15 @@ class APIv1App(APIVersion):
 	def _version_identifier(cls):
 		return "v1"
 
+	@classmethod
+	def _get_links(cls):
+		return [
+			dict(
+				rel = 'reports',
+				href = '/v1/reports'
+			)
+		]
+
 	def _safe_table_name(self, table_name):
 		"""
 		FIXME: How to defend against SQL injection?
@@ -65,13 +74,23 @@ class APIv1App(APIVersion):
 		return datetime.utcfromtimestamp(0).isoformat()
 
 	def _get_report_details(self, report_name):
-		return dict({
-				'name': report_name,
-				'description': self._get_table_comment(report_name),
-				'lastUpdated': self._get_table_lastupdate(report_name)
-			})
+		return dict(
+				name = report_name,
+				description = self._get_table_comment(report_name),
+				lastUpdated = self._get_table_lastupdate(report_name),
+				links = (
+					dict(
+						rel = 'self',
+						href = '/v1/reports/' + report_name
+					),
+					dict(
+						rel = 'resultset',
+						href = '/v1/reports/' + report_name + '/resultset'
+					)
+				)
+			)
 
-	def ReportsList(self, args):
+	def ReportsList(self, req, args):
 		self.dbconn.ping(True)
 		cursor = self.dbconn.cursor(cursors.Cursor)
 		cursor.execute('SHOW TABLES;')
@@ -80,13 +99,13 @@ class APIv1App(APIVersion):
 			self._get_report_details(row[0]) for row in rows
 		]))
 
-	def ReportDetail(self, args):
+	def ReportDetail(self, req, args):
 		table_name = args['report']
 		return Response(content_type = 'application/json', body = self._resultset_to_json(
 			self._get_report_details(table_name)
 		))
 
-	def ReportResultSet(self, args):
+	def ReportResultSet(self, req, args):
 		table_name = args['report']
 		if not self._safe_table_name(table_name):
 			return webob.exc.HTTPForbidden()

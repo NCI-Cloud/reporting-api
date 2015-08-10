@@ -6,12 +6,12 @@ from app.apiv1 import APIv1App
 
 class VersionsApp(Application):
 
-	def APIVersionList(self, args):
+	def APIVersionList(self, req, args):
 		return Response(status = 300, content_type = 'application/json', body = self._resultset_to_json([
 			version._api_version_detail() for version in APIVersion.version_classes
 		]))
 
-	def APIVersionDetails(self, version_identifier):
+	def APIVersionDetails(self, req, version_identifier):
 		versions = [ version for version in APIVersion.version_classes if version._version_identifier() == version_identifier ]
 		if not versions:
 			return webob.exc.HTTPNotFound()
