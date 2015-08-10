@@ -4,6 +4,7 @@ import json
 from webob import Request, Response
 import webob.exc
 import webob.dec
+from common.application import Application
 
 class SwaggerMiddleware(object):
 
@@ -82,8 +83,8 @@ class SwaggerMiddleware(object):
 		headers.append(('Allow', ','.join(methods)))
 		start_response('200 OK', headers)
 		if pathdef:
-			return json.dumps(pathdef)
-		return json.dumps(dict())
+			return Application._resultset_to_json(pathdef)
+		return Application._resultset_to_json(dict())
 
 	def __init__(self, application, specs, cfg=None, **kw):
 		self.specs = specs
