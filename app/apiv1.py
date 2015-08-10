@@ -62,26 +62,27 @@ class APIv1App(APIVersion):
 			return rows[0]
 		return datetime.fromtimestamp(0).isoformat()
 
+	def _get_report_details(self, report_name):
+		return dict({
+				'name': report_name,
+				'description': self._get_table_comment(report_name),
+				'lastUpdated': self._get_table_lastupdate(report_name)
+			})
+
 	def ReportsList(self, args):
 		self.dbconn.ping(True)
 		cursor = self.dbconn.cursor(cursors.Cursor)
 		cursor.execute('SHOW TABLES;')
 		rows = cursor.fetchall()
 		return Response(content_type = 'application/json', body = self._resultset_to_json([
-			{
-				'name': row[0],
-				'description': self._get_table_comment(row[0]),
-				'lastUpdated': self._get_table_lastupdate(row[0])
-			} for row in rows
+			self._get_report_details(row[0]) for row in rows
 		]))
 
 	def ReportDetail(self, args):
 		table_name = args['report']
-		return Response(content_type = 'application/json', body = self._resultset_to_json({
-			'name': table_name,
-			'description': self._get_table_comment(table_name),
-			'lastUpdated': self._get_table_lastupdate(table_name)
-		}))
+		return Response(content_type = 'application/json', body = self._resultset_to_json(
+			self._get_report_details(table_name)
+		))
 
 	def ReportResultSet(self, args):
 		table_name = args['report']

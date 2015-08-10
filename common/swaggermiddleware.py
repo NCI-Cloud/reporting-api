@@ -7,6 +7,11 @@ import webob.dec
 
 class SwaggerMiddleware(object):
 
+	"""
+	A WSGI URL router middleware that automatically configures itself
+	using a set of Swagger JSON API specifications.
+	"""
+
 	# The Swagger specification v2.0 mandates use of only these methods
 	swagger_methods = [ 'get', 'put', 'post', 'delete', 'options', 'head', 'patch' ]
 
