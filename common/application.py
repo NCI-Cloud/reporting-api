@@ -3,7 +3,6 @@ from webob import Request, Response
 import abc
 import webob.dec
 import webob.exc
-import wsgiref
 
 class Application(object):
 
