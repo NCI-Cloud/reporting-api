@@ -11,7 +11,7 @@ class SwaggerMiddleware(object):
 	swagger_methods = [ 'get', 'put', 'post', 'delete', 'options', 'head', 'patch' ]
 
 	def _path_matches(self, pattern, url):
-		# print "Testing: '%s' '%s'" % (url, pattern)
+		# print "Testing URL '%s' against pattern '%s'" % (url, pattern)
 		path_parameters = dict()
 		pattern_components = pattern.split('/')
 		url_components = url.split('/')
@@ -35,7 +35,7 @@ class SwaggerMiddleware(object):
 		# print "Match: '%s' '%s'" % (url, pattern)
 		return [ True, path_parameters ]
 
-	def _find_path(self, environ, spec):
+	def _find_path_spec(self, environ, spec):
 		if 'basePath' in spec:
 			base_path = spec['basePath']
 		else:
@@ -48,8 +48,7 @@ class SwaggerMiddleware(object):
 				return [ pathdef, parameters ]
 			"""
 			else:
-				print "Rejected path:"
-				print path
+				print "Rejected URL '%s'" % url
 			"""
 		return [ None, None ]
 
@@ -57,10 +56,19 @@ class SwaggerMiddleware(object):
 		method = environ['REQUEST_METHOD'].lower()
 		if method in pathdef:
 			return pathdef[method]
+		elif method == 'options' and 'get' in pathdef:
+			return pathdef['get']
+		return None
 
-	def _options_response(self, pathdef, parameters, environ, start_response):
+	"""
+	Respond to OPTIONS requests meaningfully,
+	implementing HATEOAS using the information in the Swagger catalogs.
+	"""
+	def _options_response(self, environ, start_response):
+		swagger = environ['swagger']
+		pathdef = swagger['path']
 		if pathdef:
-			methods = [ method.upper() for method in self.swagger_methods if method in pathdef ]
+			methods = [ method.upper() for method in self.swagger_methods if method != 'options' and method in pathdef ]
 		else:
 			methods = []
 		# Synthesise an OPTIONS method
@@ -76,38 +84,48 @@ class SwaggerMiddleware(object):
 		self.specs = specs
 		self.application = application
 
+	def _find_path(self, environ):
+		if 'swagger' in environ:
+			swagger = environ['swagger']
+		else:
+			swagger = environ['swagger'] = dict()
+		if 'path' in swagger:
+			pathdef = swagger['path']
+		else:
+			for spec in self.specs:
+				[ pathdef, path_parameters ] = self._find_path_spec(environ, spec)
+				if pathdef is not None:
+					swagger['path'] = pathdef
+					swagger['parameters'] = path_parameters
+					swagger['operation'] = self._find_operation(pathdef, environ)
+					if swagger['operation'] is not None:
+						break
+		if not('path' in swagger):
+			swagger['path'] = None
+		if not('parameters' in swagger):
+			swagger['parameters'] = None
+		if not('operation' in swagger):
+			swagger['operation'] = None
+
 	def __call__(self, environ, start_response):
 		# print "PATH_INFO: " + environ['PATH_INFO']
 		# print "SCRIPT_NAME: " + environ['SCRIPT_NAME']
 		# print self.specs
-		for spec in self.specs:
-			"""
-			if ('SCRIPT_NAME' in environ) and ('basePath' in spec):
-				if not environ['SCRIPT_NAME'].startswith(spec['basePath']):
-					return webob.exc.HTTPNotFound()
-			"""
-			data = dict()
-			[ pathdef, path_parameters ] = self._find_path(environ, spec)
-			if pathdef is not None:
-				data['path'] = pathdef
-				data['parameters'] = path_parameters
-				data['operation'] = self._find_operation(pathdef, environ)
-				environ['swagger'] = data
-				# Handle OPTIONS requests ourselves, since we know the methods allowed
-				if "options" == environ['REQUEST_METHOD'].lower():
-					return self._options_response(pathdef, path_parameters, environ, start_response)
-				# elif pathdef is not None:
-				return self.application(environ, start_response)
+		self._find_path(environ)
+		if "options" == environ['REQUEST_METHOD'].lower():
+			# Intercept this request to return an OPTIONS response
+			return self._options_response(environ, start_response)
 		return self.application(environ, start_response)
 
 def factory(config, **settings):
 	def filter(app):
 		config.update(settings)
 		swagger_files = config.get('swagger_json', 'swagger.json');
-		specs = [ json.loads(open(file).read()) for file in swagger_files.split() ]
+		specs = [ json.loads(open(filename).read()) for filename in swagger_files.split() ]
 		return SwaggerMiddleware(app, specs)
 	return filter
 
 if __name__ == '__main__':
-	middleware = SwaggerMiddleware(HelloApp())
+	app = HelloApp()
+	middleware = SwaggerMiddleware(app)
 	print middleware

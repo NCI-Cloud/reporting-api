@@ -70,7 +70,7 @@ def factory(config, **settings):
 	def filter(app):
 		config.update(settings);
 		swagger_files = config.get('swagger_json', 'swagger.json');
-		specs = [ json.loads(open(file).read()) for file in swagger_files.split() ]
+		specs = [ json.loads(open(filename).read()) for filename in swagger_files.split() ]
 		mapper = SwaggerMapper(specs)
 		return RoutesMiddleware(app, mapper)
 	return filter

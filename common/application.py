@@ -38,6 +38,9 @@ class Application(object):
 				print "No operation"
 				return webob.exc.HTTPNotFound()
 			operation = swagger['operation']
+			if operation is None:
+				print "Null operation"
+				return webob.exc.HTTPMethodNotAllowed()
 			if not ('operationId' in operation):
 				print "No operationId"
 				return webob.exc.HTTPNotFound()
@@ -58,6 +61,4 @@ class Application(object):
 			# Method specified in interface specification, but no matching Python method found
 			print self.__class__.__name__ + " has no method '%s'" % method_name
 			return webob.exc.HTTPNotImplemented()
-		if swagger:
-			return method(swagger['parameters'])
-		return method(req.environ['wsgiorg.routing_args'][1])
+		return method(method_params)
