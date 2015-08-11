@@ -15,7 +15,7 @@ class APIVersion(Application):
 		return []
 
 	@classmethod
-	def _api_version_detail(cls):
+	def _api_version_detail(cls, req):
 		links = cls._get_links()
 		links.append(dict(
 			href = "/" + cls._version_identifier(),
@@ -28,8 +28,8 @@ class APIVersion(Application):
 
 	@classmethod
 	def APIVersionDetails(cls, req, params):
-		return cls._api_version_detail()
+		return cls._api_version_detail(req)
 
 	@classmethod
 	def APIVersionList(cls, req, args):
-		return [ version._api_version_detail() for version in APIVersion.version_classes ]
+		return [ version._api_version_detail(req) for version in APIVersion.version_classes ]
