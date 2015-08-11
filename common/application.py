@@ -10,15 +10,101 @@ class Application(object):
 		return getattr(self, func_name, None)
 
 	@classmethod
-	def _resultset_to_json(self, resultset):
-		def handler(obj):
-			if hasattr(obj, 'isoformat'):
-				return obj.isoformat()
-			elif hasattr(obj, 'to_json'):
-				return obj.to_json()
+	def _pyob_to_json(cls, pyval):
+		def handler(value):
+			if hasattr(value, 'isoformat'):
+				return value.isoformat()
+			elif hasattr(value, 'to_json'):
+				return value.to_json()
 			else:
-				raise TypeError, 'Object of type %s with value of %s is not JSON serializable' % (type(obj), repr(obj))
-		return json.dumps(resultset, default = handler)
+				raise TypeError, 'Object of type %s with value of %s is not JSON serializable' % (type(value), repr(value))
+		return json.dumps(pyval, default = handler)
+
+	@classmethod
+	def _resolve_ref(cls, spec, ref):
+		if not ref.startswith('#/'):
+			raise ValueError("Cannot handle catalog ref '%s'" % ref)
+		ref = ref[2:]
+		components = ref.split('/')
+		for comp in components:
+			if comp not in spec:
+				raise ValueError("No definition component '%s' in spec '%s'" % (comp, spec))
+			spec = spec[comp]
+		return spec
+
+	@classmethod
+	def _resolve_refs(cls, spec, schema):
+		while '$ref' in schema:
+			schema = cls._resolve_ref(spec, schema['$ref'])
+		if 'type' in schema:
+			return schema['type']
+		raise ValueError('No type in schema')
+
+	@classmethod
+	def _expected_response(cls, operation):
+		if 'responses' not in operation:
+			raise ValueError('No responses')
+		responses = operation['responses']
+		if len(responses) != 1:
+			raise ValueError('No or multiple responses')
+		return responses
+
+	@classmethod
+	def _expected_status(cls, operation):
+		resp = cls._expected_response(operation)
+		return resp.keys()[0]
+
+	@classmethod
+	def _expected_body(cls, operation):
+		return cls._expected_response(operation).values()[0]
+
+	@classmethod
+	def _expected_schema(cls, operation):
+		body = cls._expected_body(operation)
+		if 'schema' not in body:
+			raise ValueError('No schema in response')
+		return body['schema']
+
+	@classmethod
+	def _coerce_to_array(cls, value):
+		if type(value) is list or type(value) is tuple:
+			return value
+		if type(value) is dict:
+			return [ value.items() ]
+		return [ value ]
+
+	@classmethod
+	def _coerce_to_dict(cls, value):
+		if type(value) is list or type(value) is tuple:
+			return dict((index, value[index]) for index in range(len(value)))
+		if type(value) is dict:
+			return value
+		return dict(value = value)
+
+	@classmethod
+	def _expected_obj(cls, spec, operation, return_value):
+		schema = cls._expected_schema(operation)
+		typ = cls._resolve_refs(spec, schema)
+		if 'array' == typ:
+			return cls._coerce_to_array(return_value)
+		elif 'object' == typ:
+			return cls._coerce_to_dict(return_value)
+		raise ValueError("Cannot convert type '%s' into a valid JSON top-level type" % typ)
+
+	@classmethod
+	def _build_response(cls, req, return_value):
+		swagger = req.environ['swagger']
+		if 'spec' not in swagger:
+			raise ValueError('No spec in environment')
+		spec = swagger['spec']
+		if 'operation' not in swagger:
+			raise ValueError('No operation in environment')
+		operation = swagger['operation']
+		return Response(
+			status = cls._expected_status(operation),
+			content_type = 'application/json',
+			body = cls._pyob_to_json(cls._expected_obj(spec, operation, return_value))
+		)
 
 	@webob.dec.wsgify
 	def __call__(self, req_dict):

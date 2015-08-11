@@ -89,7 +89,8 @@ class SwaggerMiddleware(object):
 			result = pathdef
 		else:
 			result = dict()
-		return Application._resultset_to_json(result)
+		req = Request(environ)
+		return Application._build_response(req, result).app_iter
 
 	def __init__(self, application, specs, cfg=None, **kw):
 		self.specs = specs
@@ -106,6 +107,7 @@ class SwaggerMiddleware(object):
 			for spec in self.specs:
 				[ pathdef, path_parameters ] = self._find_path_spec(environ, spec)
 				if pathdef is not None:
+					swagger['spec'] = spec
 					swagger['path'] = pathdef
 					swagger['parameters'] = path_parameters
 					swagger['operation'] = self._find_operation(pathdef, environ)

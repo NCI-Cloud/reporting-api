@@ -1,11 +1,9 @@
-import time
 from datetime import datetime
 import re
 import ConfigParser
 import MySQLdb
 from MySQLdb import cursors
 from _mysql_exceptions import OperationalError
-from webob import Response
 import webob.exc
 from common.apiversion import APIVersion
 
@@ -36,7 +34,8 @@ class APIv1App(APIVersion):
 			)
 		]
 
-	def _safe_table_name(self, table_name):
+	@classmethod
+	def _safe_table_name(cls, table_name):
 		"""
 		FIXME: How to defend against SQL injection?
 		The test below is primitive but effective.
@@ -109,15 +108,13 @@ class APIv1App(APIVersion):
 		cursor = self.dbconn.cursor(cursors.Cursor)
 		cursor.execute('SHOW TABLES;')
 		rows = cursor.fetchall()
-		return Response(content_type = 'application/json', body = self._resultset_to_json([
-			self._get_report_details(row[0]) for row in rows
-		]))
+		details = [ self._get_report_details(row[0]) for row in rows ]
+		return self._build_response(req, details)
 
 	def ReportDetail(self, req, args):
 		table_name = args['report']
-		return Response(content_type = 'application/json', body = self._resultset_to_json(
-			self._get_report_details(table_name)
-		))
+		detail = self._get_report_details(table_name)
+		return self._build_response(req, detail)
 
 	def ReportResultSet(self, req, args):
 		table_name = args['report']
@@ -135,7 +132,7 @@ class APIv1App(APIVersion):
 		except:
 			# Don't leak information about the database
 			return webob.exc.HTTPNotFound()
-		return Response(content_type = 'application/json', body = self._resultset_to_json(cursor.fetchall()))
+		return self._build_response(req, cursor.fetchall())
 
 APIVersion.version_classes.append(APIv1App)
 
