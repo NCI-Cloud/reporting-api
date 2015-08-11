@@ -98,7 +98,8 @@ class Application(object):
 	Respond to OPTIONS requests meaningfully,
 	implementing HATEOAS using the information in the Swagger catalogs.
 	"""
-	def _options_response(self, req):
+	@classmethod
+	def _options_response(cls, req):
 		swagger = req.environ['swagger']
 		pathdef = swagger['path']
 		if pathdef is None:
@@ -111,7 +112,7 @@ class Application(object):
 		methods.append('OPTIONS')
 		headers = []
 		headers.append(('Allow', ','.join(methods)))
-		return self._build_response(req, result, headers)
+		return cls._build_response(req, result, headers)
 
 	@webob.dec.wsgify
 	def __call__(self, req_dict):
