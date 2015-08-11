@@ -19,22 +19,22 @@
     ],
     "definitions": {
         "APIVersionLink": {
-            "description": "API version link",
+            "description": "A link to a resource related to an API version",
             "type": "object",
             "properties": {
+                "rel": {
+                    "description": "Relation of linked resource to API version",
+                    "type": "string"
+                },
                 "href": {
-                    "description": "URL",
+                    "description": "Address of linked resource",
                     "type": "string",
                     "format": "url"
-                },
-                "rel": {
-                    "description": "Relation to the API version",
-                    "type": "string"
                 }
             }
         },
-        "APIVersion": {
-            "description": "A version of the API",
+        "APIVersionDetails": {
+            "description": "Details of a version of the API",
             "type": "object",
             "properties": {
                 "id": {
@@ -42,7 +42,7 @@
                     "type": "string"
                 },
                 "links": {
-                    "description": "Array of links",
+                    "description": "Array of links to resources related to this API version",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/APIVersionLink"
@@ -54,8 +54,8 @@
     "paths": {
         "/": {
             "get": {
-                "summary": "List API versions",
-                "description": "Returns a collection of available versions of the Reporting API.",
+                "summary": "API versions",
+                "description": "Retrieve a list of available versions of the Reporting API",
                 "operationId": "APIVersionList",
                 "responses": {
                     "300": {
@@ -63,7 +63,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/APIVersion"
+                                "$ref": "#/definitions/APIVersionDetails"
                             }
                         }
                     }
@@ -82,13 +82,13 @@
             ],
             "get": {
                 "summary": "API version detail",
-                "description": "Returns detail of one available version of the Reporting API.",
+                "description": "Retrieve detailed information about a version of the API",
                 "operationId": "APIVersionDetails",
                 "responses": {
                     "200": {
-                        "description": "Details of the given API version",
+                        "description": "Detailed information about the given API version",
                         "schema": {
-                          "$ref": "#/definitions/APIVersion"
+                          "$ref": "#/definitions/APIVersionDetails"
                         }
                     }
                 }
