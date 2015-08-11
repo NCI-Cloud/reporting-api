@@ -62,8 +62,6 @@ class SwaggerMiddleware(object):
 		method = environ['REQUEST_METHOD'].lower()
 		if method in pathdef:
 			return pathdef[method]
-		elif method == 'options' and 'get' in pathdef:
-			return pathdef['get']
 		return None
 
 	def __init__(self, application, specs, cfg=None, **kw):

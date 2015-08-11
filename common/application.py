@@ -54,7 +54,9 @@ class Application(object):
 		return responses
 
 	@classmethod
-	def _expected_status(cls, operation):
+	def _expected_status(cls, req, operation):
+		if "options" == req.environ['REQUEST_METHOD'].lower():
+			return '200 OK'
 		resp = cls._expected_response(operation)
 		return resp.keys()[0]
 
@@ -87,6 +89,8 @@ class Application(object):
 
 	@classmethod
 	def _expected_obj(cls, spec, operation, return_value):
+		if operation is None:
+			return return_value
 		schema = cls._expected_schema(operation)
 		typ = cls._resolve_refs(spec, schema)
 		if 'array' == typ:
@@ -101,11 +105,13 @@ class Application(object):
 		if 'spec' not in swagger:
 			raise ValueError('No spec in environment')
 		spec = swagger['spec']
-		if 'operation' not in swagger:
-			raise ValueError('No operation in environment')
-		operation = swagger['operation']
+		if 'operation' in swagger:
+			operation = swagger['operation']
+		else:
+			operation = None
+		status = cls._expected_status(req, operation)
 		return Response(
-			status = cls._expected_status(operation),
+			status = status,
 			content_type = 'application/json',
 			body = cls._pyob_to_json(cls._expected_obj(spec, operation, return_value))
 		)
@@ -117,24 +123,18 @@ class Application(object):
 	def _options_response(self, environ, start_response):
 		swagger = environ['swagger']
 		pathdef = swagger['path']
-		operation = swagger['operation']
 		if pathdef is None:
+			result = None
 			methods = []
 		else:
+			result = pathdef
 			methods = [ method.upper() for method in self.swagger_methods if method != 'options' and method in pathdef ]
 		# Synthesise an OPTIONS method
 		methods.append('OPTIONS')
 		headers = []
 		headers.append(('Allow', ','.join(methods)))
 		start_response('200 OK', headers)
-		if operation is not None:
-			result = operation
-		elif pathdef is not None:
-			result = pathdef
-		else:
-			result = dict()
-		req = Request(environ)
-		return self._build_response(req, result).app_iter
+		return self._build_response(Request(environ), result).app_iter
 
 	@webob.dec.wsgify
 	def __call__(self, req_dict):
