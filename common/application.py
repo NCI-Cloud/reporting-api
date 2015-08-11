@@ -3,12 +3,9 @@ from webob import Request, Response
 import abc
 import webob.dec
 import webob.exc
+from common.specification import SwaggerSpecification
 
 class Application(object):
-
-	# The Swagger specification v2.0 mandates use of only these methods
-	# TODO: Duplicated data
-	swagger_methods = [ 'get', 'put', 'post', 'delete', 'options', 'head', 'patch' ]
 
 	def _get_method(self, func_name):
 		return getattr(self, func_name, None)
@@ -109,7 +106,7 @@ class Application(object):
 			methods = []
 		else:
 			result = pathdef
-			methods = [ method.upper() for method in self.swagger_methods if method != 'options' and method in pathdef ]
+			methods = [ method.upper() for method in SwaggerSpecification.methods if method != 'options' and method in pathdef ]
 		# Synthesise an OPTIONS method
 		methods.append('OPTIONS')
 		headers = []

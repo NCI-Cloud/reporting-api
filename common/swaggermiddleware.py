@@ -10,9 +10,6 @@ class SwaggerMiddleware(object):
 	using a set of Swagger JSON API specifications.
 	"""
 
-	# The Swagger specification v2.0 mandates use of only these methods
-	swagger_methods = [ 'get', 'put', 'post', 'delete', 'options', 'head', 'patch' ]
-
 	def __init__(self, application, specs, cfg=None, **kw):
 		self.specs = specs
 		self.application = application

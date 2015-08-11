@@ -4,15 +4,13 @@ import json
 import os
 from routes.middleware import RoutesMiddleware
 from routes import Mapper
+from common.specification import SwaggerSpecification
 
 class SwaggerMapper(Mapper):
 	"""
 	A WSGI URL router middleware that automatically configures itself
 	using a set of Swagger JSON API specifications.
 	"""
-
-	# The Swagger specification v2.0 mandates use of only these methods
-	swagger_methods = [ 'get', 'put', 'post', 'delete', 'options', 'head', 'patch' ]
 
 	def __init__(self, swagger_specs):
 		super(SwaggerMapper, self).__init__();
@@ -43,7 +41,7 @@ class SwaggerMapper(Mapper):
 			However, doing so would impose additional structure on the API,
 			limiting the generality of Swagger and this class.
 			"""
-			methods = [ method for method in self.swagger_methods if method != 'options' and method in pathdef ]
+			methods = [ method for method in SwaggerSpecification.methods if method != 'options' and method in pathdef ]
 			for method in methods:
 				methoddef = pathdef[method]
 				if 'operationId' in methoddef:
