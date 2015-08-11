@@ -2,7 +2,7 @@
     "swagger": "2.0",
     "info": {
         "version": "0.1.0",
-        "title": "OpenStack Reporting API",
+        "title": "OpenStack Reporting API version 1",
         "description": "A RESTful interface to a collection of reports."
     },
     "host": "130.56.242.65:9494",
@@ -19,7 +19,7 @@
         "text/xml"
     ],
     "definitions": {
-        "Link": {
+        "ReportLink": {
             "description": "A link related to a report",
             "type": "object",
             "properties": {
@@ -29,7 +29,8 @@
                 },
                 "href": {
                     "description": "Address of linked resource",
-                    "type": "string"
+                    "type": "string",
+                    "format": "url"
                 }
             }
         },
@@ -54,7 +55,7 @@
                     "description": "List of resources related to this report",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/Link"
+                        "$ref": "#/definitions/ReportLink"
                     }
                 }
             }
