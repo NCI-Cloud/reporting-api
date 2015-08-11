@@ -25,26 +25,6 @@ class Application(object):
 		return json.dumps(pyval, default = handler)
 
 	@classmethod
-	def _resolve_ref(cls, spec, ref):
-		if not ref.startswith('#/'):
-			raise ValueError("Cannot handle catalog ref '%s'" % ref)
-		ref = ref[2:]
-		components = ref.split('/')
-		for comp in components:
-			if comp not in spec:
-				raise ValueError("No definition component '%s' in spec '%s'" % (comp, spec))
-			spec = spec[comp]
-		return spec
-
-	@classmethod
-	def _resolve_refs(cls, spec, schema):
-		while '$ref' in schema:
-			schema = cls._resolve_ref(spec, schema['$ref'])
-		if 'type' in schema:
-			return schema['type']
-		raise ValueError('No type in schema')
-
-	@classmethod
 	def _expected_response(cls, operation):
 		if 'responses' not in operation:
 			raise ValueError('No responses')
@@ -92,7 +72,7 @@ class Application(object):
 		if operation is None:
 			return return_value
 		schema = cls._expected_schema(operation)
-		typ = cls._resolve_refs(spec, schema)
+		typ = spec._resolve_refs(schema)
 		if 'array' == typ:
 			return cls._coerce_to_array(return_value)
 		elif 'object' == typ:
