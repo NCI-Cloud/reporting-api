@@ -4,6 +4,7 @@ import re
 import ConfigParser
 import MySQLdb
 from MySQLdb import cursors
+from _mysql_exceptions import OperationalError
 from webob import Response
 import webob.exc
 from common.apiversion import APIVersion
@@ -45,8 +46,21 @@ class APIv1App(APIVersion):
 			return True
 		return False
 
+	def _before_db(self):
+		"""
+		MySQL-specific: attempt to reconnect if our connection has timed out
+		"""
+		try:
+			self.dbconn.ping(True)
+		except OperationalError:
+			"""
+			Probably just a stale connection.
+			If something worse has gone wrong, we will see it soon anyway.
+			"""
+			pass
+
 	def _get_tables_comments(self, table_names):
-		self.dbconn.ping(True)
+		self._before_db()
 		cursor = self.dbconn.cursor(cursors.Cursor)
 		for table_name in table_names:
 			if not self._safe_table_name(table_name):
@@ -59,7 +73,7 @@ class APIv1App(APIVersion):
 		return self._get_tables_comments([ table_name ])[0]
 
 	def _get_table_lastupdates(self, table_names):
-		self.dbconn.ping(True)
+		self._before_db()
 		cursor = self.dbconn.cursor(cursors.Cursor)
 		for table_name in table_names:
 			if not self._safe_table_name(table_name):
@@ -91,7 +105,7 @@ class APIv1App(APIVersion):
 			)
 
 	def ReportsList(self, req, args):
-		self.dbconn.ping(True)
+		self._before_db()
 		cursor = self.dbconn.cursor(cursors.Cursor)
 		cursor.execute('SHOW TABLES;')
 		rows = cursor.fetchall()
@@ -109,7 +123,7 @@ class APIv1App(APIVersion):
 		table_name = args['report']
 		if not self._safe_table_name(table_name):
 			return webob.exc.HTTPForbidden()
-		self.dbconn.ping(True)
+		self._before_db()
 		cursor = self.dbconn.cursor(cursors.DictCursor)
 		try:
 			cursor.execute('CALL ' + table_name + '_update();')
