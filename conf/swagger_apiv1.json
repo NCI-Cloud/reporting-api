@@ -19,6 +19,20 @@
         "text/xml"
     ],
     "definitions": {
+        "Link": {
+            "description": "A link related to a report",
+            "type": "object",
+            "properties": {
+                "rel": {
+                    "description": "Relation of linked resource to report",
+                    "type": "string"
+                },
+                "href": {
+                    "description": "Address of linked resource",
+                    "type": "string"
+                }
+            }
+        },
         "ReportDetails": {
             "description": "Details of a report",
             "type": "object",
@@ -35,6 +49,13 @@
                     "description": "Time this report's data was last updated",
                     "type": "string",
                     "format": "date-time"
+                },
+                "links": {
+                    "description": "List of resources related to this report",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Link"
+                    }
                 }
             }
         },
