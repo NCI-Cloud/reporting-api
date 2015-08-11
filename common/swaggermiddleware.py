@@ -21,7 +21,7 @@ class SwaggerMiddleware(object):
 		self.specs = specs
 		self.application = application
 
-	def _find_path(self, environ):
+	def _decorate_environment(self, environ):
 		url = environ['SCRIPT_NAME'] + environ['PATH_INFO']
 		if 'swagger' in environ:
 			swagger = environ['swagger']
@@ -50,10 +50,7 @@ class SwaggerMiddleware(object):
 		# print "PATH_INFO: " + environ['PATH_INFO']
 		# print "SCRIPT_NAME: " + environ['SCRIPT_NAME']
 		# print self.specs
-		self._find_path(environ)
-		if "options" == environ['REQUEST_METHOD'].lower():
-			# Intercept this request to return an OPTIONS response
-			return self.application._options_response(environ, start_response)
+		self._decorate_environment(environ)
 		return self.application(environ, start_response)
 
 def factory(config, **settings):

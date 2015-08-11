@@ -80,7 +80,7 @@ class Application(object):
 		raise ValueError("Cannot convert type '%s' into a valid JSON top-level type" % typ)
 
 	@classmethod
-	def _build_response(cls, req, return_value):
+	def _build_response(cls, req, return_value, headers = []):
 		swagger = req.environ['swagger']
 		if 'spec' not in swagger:
 			raise ValueError('No spec in environment')
@@ -93,15 +93,16 @@ class Application(object):
 		return Response(
 			status = status,
 			content_type = 'application/json',
-			body = cls._pyob_to_json(cls._expected_obj(spec, operation, return_value))
+			body = cls._pyob_to_json(cls._expected_obj(spec, operation, return_value)),
+			headers = headers
 		)
 
 	"""
 	Respond to OPTIONS requests meaningfully,
 	implementing HATEOAS using the information in the Swagger catalogs.
 	"""
-	def _options_response(self, environ, start_response):
-		swagger = environ['swagger']
+	def _options_response(self, req):
+		swagger = req.environ['swagger']
 		pathdef = swagger['path']
 		if pathdef is None:
 			result = None
@@ -113,12 +114,14 @@ class Application(object):
 		methods.append('OPTIONS')
 		headers = []
 		headers.append(('Allow', ','.join(methods)))
-		start_response('200 OK', headers)
-		return self._build_response(Request(environ), result).app_iter
+		return self._build_response(req, result, headers)
 
 	@webob.dec.wsgify
 	def __call__(self, req_dict):
 		req = Request(req_dict.environ)
+		if "options" == req.environ['REQUEST_METHOD'].lower():
+			# Intercept this request to return an OPTIONS response
+			return self._options_response(req)
 		if 'wsgiorg.routing_args' in req.environ:
 			routing_args = req.environ['wsgiorg.routing_args']
 			method_params = routing_args[1]
