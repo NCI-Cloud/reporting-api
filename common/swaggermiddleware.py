@@ -1,10 +1,6 @@
 #!/usr/bin/python
 
 import json
-from webob import Request, Response
-import webob.exc
-import webob.dec
-from common.application import Application
 from common.specification import SwaggerSpecification
 
 class SwaggerMiddleware(object):
