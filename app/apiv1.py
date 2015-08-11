@@ -109,12 +109,12 @@ class APIv1App(APIVersion):
 		cursor.execute('SHOW TABLES;')
 		rows = cursor.fetchall()
 		details = [ self._get_report_details(row[0]) for row in rows ]
-		return self._build_response(req, details)
+		return details
 
 	def ReportDetail(self, req, args):
 		table_name = args['report']
 		detail = self._get_report_details(table_name)
-		return self._build_response(req, detail)
+		return detail
 
 	def ReportResultSet(self, req, args):
 		table_name = args['report']
@@ -132,7 +132,7 @@ class APIv1App(APIVersion):
 		except:
 			# Don't leak information about the database
 			return webob.exc.HTTPNotFound()
-		return self._build_response(req, cursor.fetchall())
+		return cursor.fetchall()
 
 APIVersion.version_classes.append(APIv1App)
 

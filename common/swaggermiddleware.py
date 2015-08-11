@@ -66,32 +66,6 @@ class SwaggerMiddleware(object):
 			return pathdef['get']
 		return None
 
-	"""
-	Respond to OPTIONS requests meaningfully,
-	implementing HATEOAS using the information in the Swagger catalogs.
-	"""
-	def _options_response(self, environ, start_response):
-		swagger = environ['swagger']
-		pathdef = swagger['path']
-		operation = swagger['operation']
-		if pathdef is None:
-			methods = []
-		else:
-			methods = [ method.upper() for method in self.swagger_methods if method != 'options' and method in pathdef ]
-		# Synthesise an OPTIONS method
-		methods.append('OPTIONS')
-		headers = []
-		headers.append(('Allow', ','.join(methods)))
-		start_response('200 OK', headers)
-		if operation is not None:
-			result = operation
-		elif pathdef is not None:
-			result = pathdef
-		else:
-			result = dict()
-		req = Request(environ)
-		return Application._build_response(req, result).app_iter
-
 	def __init__(self, application, specs, cfg=None, **kw):
 		self.specs = specs
 		self.application = application
@@ -127,7 +101,7 @@ class SwaggerMiddleware(object):
 		self._find_path(environ)
 		if "options" == environ['REQUEST_METHOD'].lower():
 			# Intercept this request to return an OPTIONS response
-			return self._options_response(environ, start_response)
+			return self.application._options_response(environ, start_response)
 		return self.application(environ, start_response)
 
 def factory(config, **settings):

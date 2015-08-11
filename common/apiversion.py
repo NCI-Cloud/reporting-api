@@ -28,11 +28,8 @@ class APIVersion(Application):
 
 	@classmethod
 	def APIVersionDetails(cls, req, params):
-		return cls._build_response(req, cls._api_version_detail())
+		return cls._api_version_detail()
 
 	@classmethod
 	def APIVersionList(cls, req, args):
-		return cls._build_response(
-			req,
-			[ version._api_version_detail() for version in APIVersion.version_classes ]
-		)
+		return [ version._api_version_detail() for version in APIVersion.version_classes ]

@@ -6,6 +6,10 @@ import webob.exc
 
 class Application(object):
 
+	# The Swagger specification v2.0 mandates use of only these methods
+	# TODO: Duplicated data
+	swagger_methods = [ 'get', 'put', 'post', 'delete', 'options', 'head', 'patch' ]
+
 	def _get_method(self, func_name):
 		return getattr(self, func_name, None)
 
@@ -106,6 +110,32 @@ class Application(object):
 			body = cls._pyob_to_json(cls._expected_obj(spec, operation, return_value))
 		)
 
+	"""
+	Respond to OPTIONS requests meaningfully,
+	implementing HATEOAS using the information in the Swagger catalogs.
+	"""
+	def _options_response(self, environ, start_response):
+		swagger = environ['swagger']
+		pathdef = swagger['path']
+		operation = swagger['operation']
+		if pathdef is None:
+			methods = []
+		else:
+			methods = [ method.upper() for method in self.swagger_methods if method != 'options' and method in pathdef ]
+		# Synthesise an OPTIONS method
+		methods.append('OPTIONS')
+		headers = []
+		headers.append(('Allow', ','.join(methods)))
+		start_response('200 OK', headers)
+		if operation is not None:
+			result = operation
+		elif pathdef is not None:
+			result = pathdef
+		else:
+			result = dict()
+		req = Request(environ)
+		return self._build_response(req, result).app_iter
+
 	@webob.dec.wsgify
 	def __call__(self, req_dict):
 		req = Request(req_dict.environ)
@@ -120,14 +150,14 @@ class Application(object):
 		elif 'swagger' in req.environ:
 			swagger = req.environ['swagger']
 			# print swagger
-			if not ('operation' in swagger):
+			if 'operation' not in swagger:
 				print "No operation"
 				return webob.exc.HTTPNotFound()
 			operation = swagger['operation']
 			if operation is None:
 				print "Null operation"
 				return webob.exc.HTTPMethodNotAllowed()
-			if not ('operationId' in operation):
+			if 'operationId' not in operation:
 				print "No operationId"
 				return webob.exc.HTTPNotFound()
 			method_name = operation['operationId']
@@ -147,4 +177,7 @@ class Application(object):
 			# Method specified in interface specification, but no matching Python method found
 			print self.__class__.__name__ + " has no method '%s'" % method_name
 			return webob.exc.HTTPNotImplemented()
-		return method(req, method_params)
+		result = method(req, method_params)
+		if isinstance(result, webob.exc.HTTPException):
+			return result
+		return self._build_response(req, result)
