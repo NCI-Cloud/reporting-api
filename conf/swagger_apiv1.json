@@ -92,7 +92,7 @@
                 }
             }
         },
-        "/reports/{report}/resultset": {
+        "/reports/{report}": {
             "get": {
                 "summary": "Result set",
                 "description": "Retrieve a result set from the given report",
