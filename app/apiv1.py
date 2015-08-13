@@ -12,8 +12,8 @@ class APIv1App(APIVersion):
 	def __init__(self, config_file):
 		self.config = config_file
 		self.dbname = self.config.get('database', 'dbname')
-		if not self._safe_table_name(self.dbname):
-			raise ValueError('DB name not also a valid table name, assumed unsafe')
+		if not self._safe_sql_identifier(self.dbname):
+			raise ValueError("Unsafe DB name '%s'" % self.dbname)
 		self.dbconn = MySQLdb.connect(
 			host = self.config.get('database', 'hostname'),
 			user = self.config.get('database', 'username'),
@@ -35,7 +35,7 @@ class APIv1App(APIVersion):
 		]
 
 	@classmethod
-	def _safe_table_name(cls, table_name):
+	def _safe_sql_identifier(cls, table_name):
 		"""
 		FIXME: How to defend against SQL injection?
 		The test below is primitive but effective.
@@ -62,7 +62,7 @@ class APIv1App(APIVersion):
 		self._before_db()
 		cursor = self.dbconn.cursor(cursors.Cursor)
 		for table_name in table_names:
-			if not self._safe_table_name(table_name):
+			if not self._safe_sql_identifier(table_name):
 				return webob.exc.HTTPForbidden()
 		cursor.execute("SELECT table_comment FROM INFORMATION_SCHEMA.TABLES WHERE table_schema='" + self.dbname + "' AND table_name IN ('" + "','".join(table_names) + "');")
 		rows = cursor.fetchall()
@@ -75,7 +75,7 @@ class APIv1App(APIVersion):
 		self._before_db()
 		cursor = self.dbconn.cursor(cursors.Cursor)
 		for table_name in table_names:
-			if not self._safe_table_name(table_name):
+			if not self._safe_sql_identifier(table_name):
 				return webob.exc.HTTPForbidden()
 		cursor.execute("SELECT ts FROM metadata WHERE table_name IN ('" + "','".join(table_names) + "');")
 		return [ row[0] for row in cursor.fetchall() ]
@@ -113,7 +113,7 @@ class APIv1App(APIVersion):
 
 	def ReportResultSet(self, req, args):
 		table_name = args['report']
-		if not self._safe_table_name(table_name):
+		if not self._safe_sql_identifier(table_name):
 			return webob.exc.HTTPForbidden()
 		self._before_db()
 		cursor = self.dbconn.cursor(cursors.DictCursor)
