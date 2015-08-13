@@ -37,4 +37,5 @@ for url in $urls ; do
 	fi
 done
 
+echo "All tests successful"
 exit 0
