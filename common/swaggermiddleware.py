@@ -32,6 +32,8 @@ class SwaggerMiddleware(object):
 					swagger['operation'] = spec._find_operation(pathdef, environ['REQUEST_METHOD'])
 					if swagger['operation'] is not None:
 						break
+		if not('spec' in swagger):
+			swagger['spec'] = None
 		if not('path' in swagger):
 			swagger['path'] = None
 		if not('parameters' in swagger):

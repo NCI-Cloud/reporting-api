@@ -54,6 +54,8 @@ class Application(object):
 			return value
 		if type(value) is dict:
 			return [ value.items() ]
+		if value is None:
+			return []
 		return [ value ]
 
 	@classmethod
@@ -62,25 +64,30 @@ class Application(object):
 			return dict((index, value[index]) for index in range(len(value)))
 		if type(value) is dict:
 			return value
+		if value is None:
+			return dict()
 		return dict(value = value)
 
 	@classmethod
 	def _expected_obj(cls, spec, operation, return_value):
 		if operation is None:
-			return return_value
-		schema = cls._expected_schema(operation)
-		typ = spec._resolve_refs(schema)
-		if 'array' == typ:
-			return cls._coerce_to_array(return_value)
-		elif 'object' == typ:
-			return cls._coerce_to_dict(return_value)
-		raise ValueError("Cannot convert type '%s' into a valid JSON top-level type" % typ)
+			if return_value is None:
+				return [];
+			if type(return_value) is list or type(return_value) is tuple or type(return_value) is dict:
+				return return_value
+			return [ return_value ]
+		else:
+			schema = cls._expected_schema(operation)
+			typ = spec._resolve_refs(schema)
+			if 'array' == typ:
+				return cls._coerce_to_array(return_value)
+			elif 'object' == typ:
+				return cls._coerce_to_dict(return_value)
+			raise ValueError("Cannot convert type '%s' into a valid JSON top-level type" % typ)
 
 	@classmethod
 	def _build_response(cls, req, return_value, headers = []):
 		swagger = req.environ['swagger']
-		if 'spec' not in swagger:
-			raise ValueError('No spec in environment')
 		spec = swagger['spec']
 		if 'operation' in swagger:
 			operation = swagger['operation']
@@ -101,13 +108,17 @@ class Application(object):
 	@classmethod
 	def _options_response(cls, req):
 		swagger = req.environ['swagger']
-		pathdef = swagger['path']
-		if pathdef is None:
+		spec = swagger['spec']
+		path = swagger['path']
+		if spec is None:
 			result = None
 			methods = []
+		elif path is None:
+			result = spec
+			methods = [ method.upper() for method in SwaggerSpecification.methods if method != 'options' ]
 		else:
-			result = pathdef
-			methods = [ method.upper() for method in SwaggerSpecification.methods if method != 'options' and method in pathdef ]
+			result = path
+			methods = [ method.upper() for method in SwaggerSpecification.methods if method != 'options' and method in path ]
 		# Synthesise an OPTIONS method
 		methods.append('OPTIONS')
 		headers = []
@@ -127,25 +138,25 @@ class Application(object):
 				method_name = method_params['method']
 			else:
 				return webob.exc.HTTPNotFound()
-			swagger = None
 		elif 'swagger' in req.environ:
 			swagger = req.environ['swagger']
 			# print swagger
-			if 'operation' not in swagger:
-				print "No operation"
-				return webob.exc.HTTPNotFound()
+			path = swagger['path']
 			operation = swagger['operation']
+			"""If no Swagger path matched, 404 Not Found"""
+			if path is None:
+				print "No path"
+				return webob.exc.HTTPNotFound()
+			"""If Swagger path matched, but no operation matched the HTTP method, HTTP Method Not Allowed"""
 			if operation is None:
 				print "Null operation"
+				print path
 				return webob.exc.HTTPMethodNotAllowed()
 			if 'operationId' not in operation:
-				print "No operationId"
-				return webob.exc.HTTPNotFound()
+				# TODO: Check this condition at API spec load time
+				raise ValueError("No operationId in Swagger specification")
 			method_name = operation['operationId']
-			if 'parameters' in swagger:
-				method_params = swagger['parameters']
-			else:
-				method_params = dict()
+			method_params = swagger['parameters']
 		else:
 			print "Neither wsgiorg.routing_args nor swagger in environment"
 			return webob.exc.HTTPNotFound()
