@@ -111,11 +111,6 @@ class APIv1App(APIVersion):
 		details = [ self._get_report_details(row[0]) for row in rows ]
 		return details
 
-	def ReportDetail(self, req, args):
-		table_name = args['report']
-		detail = self._get_report_details(table_name)
-		return detail
-
 	def ReportResultSet(self, req, args):
 		table_name = args['report']
 		if not self._safe_table_name(table_name):

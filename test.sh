@@ -8,8 +8,6 @@ fi
 urls="\
 http://${ip}:9494/v1/reports/projects/resultset/ \
 http://${ip}:9494/v1/reports/projects/resultset \
-http://${ip}:9494/v1/reports/projects/ \
-http://${ip}:9494/v1/reports/projects \
 http://${ip}:9494/v1/reports/ \
 http://${ip}:9494/v1/reports \
 http://${ip}:9494/v1/ \

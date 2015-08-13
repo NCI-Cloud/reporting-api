@@ -92,30 +92,6 @@
                 }
             }
         },
-        "/reports/{report}": {
-            "parameters": [
-                {
-                    "description": "Name of report",
-                    "name": "report",
-                    "in": "path",
-                    "required": true,
-                    "type": "string"
-                }
-            ],
-            "get": {
-                "summary": "Report detail",
-                "description": "Retrieve detailed information about a report",
-                "operationId": "ReportDetail",
-                "responses": {
-                    "200": {
-                        "description": "Detailed information about the given report",
-                        "schema": {
-                            "$ref": "#/definitions/ReportDetails"
-                        }
-                    }
-                }
-            }
-        },
         "/reports/{report}/resultset": {
             "get": {
                 "summary": "Result set",
