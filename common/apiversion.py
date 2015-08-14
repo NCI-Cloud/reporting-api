@@ -17,10 +17,7 @@ class APIVersion(Application):
 	@classmethod
 	def _api_version_detail(cls, req):
 		links = cls._get_links()
-		links.append(dict(
-			href = "/" + cls._version_identifier(),
-			rel = "self"
-		))
+		links['self'] = "/" + cls._version_identifier()
 		return dict(
 			id = cls._version_identifier(),
 			links = links

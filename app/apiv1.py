@@ -27,12 +27,15 @@ class APIv1App(APIVersion):
 
 	@classmethod
 	def _get_links(cls):
-		return [
-			dict(
-				rel = 'reports',
-				href = '/v1/reports'
-			)
-		]
+		return dict(
+			reports = '/v1/reports'
+		)
+
+	@classmethod
+	def _get_report_links(cls, report):
+		return dict(
+			self = '/v1/reports/' + report
+		)
 
 	@classmethod
 	def _safe_sql_identifier(cls, string):
@@ -91,12 +94,7 @@ class APIv1App(APIVersion):
 				name = report_name,
 				description = self._get_table_comment(report_name),
 				lastUpdated = self._get_table_lastupdate(report_name),
-				links = (
-					dict(
-						rel = 'self',
-						href = '/v1/reports/' + report_name
-					)
-				)
+				links = self._get_report_links(report_name)
 			)
 
 	def ReportsList(self, req, args):
