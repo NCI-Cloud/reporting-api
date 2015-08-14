@@ -146,7 +146,6 @@ class APIv1App(APIVersion):
 				criteria.append("`" + key + "`='" + val[0] + "'")
 			query += ' AND '.join(criteria)
 		query += ';'
-		print query
 		self._before_db()
 		cursor = self.dbconn.cursor(cursors.DictCursor)
 		try:
