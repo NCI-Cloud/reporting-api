@@ -104,28 +104,8 @@
         "/reports/{report}": {
             "get": {
                 "summary": "Result set",
-                "description": "Retrieve a result set from the given report",
-                "operationId": "ReportResultSet",
-                "parameters": [
-                    {
-                        "$ref": "#/parameters/report"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Report result set",
-                        "schema": {
-                            "$ref": "#/definitions/ResultSet"
-                        }
-                    }
-                }
-            }
-        },
-        "/reports/{report}/search": {
-            "get": {
-                "summary": "Result set",
                 "description": "Retrieve a result set by searching the given report",
-                "operationId": "ReportSearch",
+                "operationId": "ReportResultSet",
                 "parameters": [
                     {
                         "$ref": "#/parameters/report"

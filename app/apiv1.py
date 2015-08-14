@@ -95,10 +95,6 @@ class APIv1App(APIVersion):
 					dict(
 						rel = 'self',
 						href = '/v1/reports/' + report_name
-					),
-					dict(
-						rel = 'search',
-						href = '/v1/reports/' + report_name + '/search'
 					)
 				)
 			)
@@ -112,24 +108,6 @@ class APIv1App(APIVersion):
 		return details
 
 	def ReportResultSet(self, req, args):
-		table_name = args['report']
-		if not self._safe_sql_identifier(table_name):
-			return webob.exc.HTTPForbidden()
-		self._before_db()
-		cursor = self.dbconn.cursor(cursors.DictCursor)
-		try:
-			cursor.execute('CALL ' + table_name + '_update();')
-		except:
-			# Can't refresh the report. Degrade gracefully by serving old data.
-			pass
-		try:
-			cursor.execute('SELECT * FROM ' + table_name + ';')
-		except:
-			# Don't leak information about the database
-			return webob.exc.HTTPNotFound()
-		return cursor.fetchall()
-
-	def ReportSearch(self, req, args):
 		table_name = args['report']
 		del args['report']
 		if not self._safe_sql_identifier(table_name):
