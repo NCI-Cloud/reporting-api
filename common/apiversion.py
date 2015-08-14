@@ -29,7 +29,3 @@ class APIVersion(Application):
 	@classmethod
 	def APIVersionDetails(cls, req, params):
 		return ( cls._api_version_detail(req), None )
-
-	@classmethod
-	def APIVersionList(cls, req, args):
-		return ( version._api_version_detail(req) for version in APIVersion.version_classes )
