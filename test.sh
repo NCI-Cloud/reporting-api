@@ -6,6 +6,7 @@ if test -z "$ip" ; then
 fi
 
 urls="\
+http://${ip}:9494/v1/reports/instances/search?name=test \
 http://${ip}:9494/v1/reports/projects/ \
 http://${ip}:9494/v1/reports/projects \
 http://${ip}:9494/v1/reports/ \

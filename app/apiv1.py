@@ -125,6 +125,42 @@ class APIv1App(APIVersion):
 			return webob.exc.HTTPNotFound()
 		return cursor.fetchall()
 
+	def ReportSearch(self, req, args):
+		table_name = args['report']
+		del args['report']
+		if not self._safe_sql_identifier(table_name):
+			return webob.exc.HTTPForbidden()
+		for (key, val) in args.items():
+			if not self._safe_sql_identifier(key):
+				return webob.exc.HTTPForbidden()
+			if len(val) != 1:
+				return webob.exc.HTTPBadRequest("No or multiple values passed for parameter '%s'" % key)
+			for ent in val:
+				if not self._safe_sql_identifier(ent):
+					return webob.exc.HTTPForbidden()
+		query = 'SELECT * FROM `' + table_name + '`'
+		if args:
+			query += ' WHERE '
+			criteria = []
+			for (key, val) in args.items():
+				criteria.append("`" + key + "`='" + val[0] + "'")
+			query += ' AND '.join(criteria)
+		query += ';'
+		print query
+		self._before_db()
+		cursor = self.dbconn.cursor(cursors.DictCursor)
+		try:
+			cursor.execute('CALL ' + table_name + '_update();')
+		except:
+			# Can't refresh the report. Degrade gracefully by serving old data.
+			pass
+		try:
+			cursor.execute(query)
+		except:
+			# Don't leak information about the database
+			return webob.exc.HTTPNotFound()
+		return cursor.fetchall()
+
 APIVersion.version_classes.append(APIv1App)
 
 def factory(global_config, **settings):

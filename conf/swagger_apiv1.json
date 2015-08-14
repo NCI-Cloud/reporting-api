@@ -115,6 +115,30 @@
                     }
                 }
             }
+        },
+        "/reports/{report}/search": {
+            "get": {
+                "summary": "Result set",
+                "description": "Retrieve a result set by searching the given report",
+                "operationId": "ReportSearch",
+                "parameters": [
+                    {
+                        "name": "report",
+                        "in": "path",
+                        "description": "Name of report",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Report result set",
+                        "schema": {
+                            "$ref": "#/definitions/ResultSet"
+                        }
+                    }
+                }
+            }
         }
     }
 }
