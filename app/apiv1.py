@@ -95,6 +95,10 @@ class APIv1App(APIVersion):
 					dict(
 						rel = 'self',
 						href = '/v1/reports/' + report_name
+					),
+					dict(
+						rel = 'search',
+						href = '/v1/reports/' + report_name + '/search'
 					)
 				)
 			)
