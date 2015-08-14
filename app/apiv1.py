@@ -105,7 +105,7 @@ class APIv1App(APIVersion):
 		cursor.execute('SHOW TABLES;')
 		rows = cursor.fetchall()
 		details = [ self._get_report_details(row[0]) for row in rows ]
-		return details
+		return ( details, None )
 
 	def ReportResultSet(self, req, args):
 		table_name = args['report']
@@ -120,6 +120,7 @@ class APIv1App(APIVersion):
 			for ent in val:
 				if not self._safe_sql_identifier(ent):
 					return webob.exc.HTTPForbidden()
+		headers = None
 		query = 'SELECT * FROM `' + table_name + '`'
 		if args:
 			query += ' WHERE '
@@ -127,6 +128,10 @@ class APIv1App(APIVersion):
 			for (key, val) in args.items():
 				criteria.append("`" + key + "`='" + val[0] + "'")
 			query += ' AND '.join(criteria)
+		else:
+			# TODO: Add an Expires header and respond to conditional GETs
+			# headers.append(('Expires', ))
+			pass
 		query += ';'
 		self._before_db()
 		cursor = self.dbconn.cursor(cursors.DictCursor)
@@ -140,7 +145,7 @@ class APIv1App(APIVersion):
 		except:
 			# Don't leak information about the database
 			return webob.exc.HTTPBadRequest()
-		return cursor.fetchall()
+		return ( cursor.fetchall(), headers )
 
 APIVersion.version_classes.append(APIv1App)
 

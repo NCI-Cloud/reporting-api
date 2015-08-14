@@ -87,7 +87,7 @@ class Application(object):
 			raise ValueError("Cannot convert type '%s' into a valid JSON top-level type" % typ)
 
 	@classmethod
-	def _build_response(cls, req, return_value, headers = []):
+	def _build_response(cls, req, return_value, headers = None):
 		if isinstance(return_value, webob.exc.WSGIHTTPException):
 			return return_value
 		swagger = req.environ['swagger']
@@ -97,6 +97,8 @@ class Application(object):
 		else:
 			operation = None
 		status = cls._expected_status(req, operation)
+		if not headers:
+			headers = []
 		return Response(
 			status = status,
 			content_type = 'application/json',
@@ -180,7 +182,7 @@ class Application(object):
 		else:
 			query_params = dict()
 		query_params.update(method_params)
-		result = method(req, query_params)
+		result, headers = method(req, query_params)
 		if isinstance(result, webob.exc.HTTPException):
 			return result
-		return self._build_response(req, result)
+		return self._build_response(req, result, headers)
