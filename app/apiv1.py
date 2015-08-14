@@ -35,13 +35,13 @@ class APIv1App(APIVersion):
 		]
 
 	@classmethod
-	def _safe_sql_identifier(cls, table_name):
+	def _safe_sql_identifier(cls, string):
 		"""
 		FIXME: How to defend against SQL injection?
 		The test below is primitive but effective.
 		PyMySQLdb has no placeholders for table names :-(
 		"""
-		if re.compile('^[a-zA-Z0-9_]+$').match(table_name):
+		if re.compile('^[a-zA-Z0-9_]*$').match(string):
 			return True
 		return False
 
@@ -157,7 +157,7 @@ class APIv1App(APIVersion):
 			cursor.execute(query)
 		except:
 			# Don't leak information about the database
-			return webob.exc.HTTPNotFound()
+			return webob.exc.HTTPBadRequest()
 		return cursor.fetchall()
 
 APIVersion.version_classes.append(APIv1App)
