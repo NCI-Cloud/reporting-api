@@ -18,6 +18,15 @@
         "application/json",
         "text/xml"
     ],
+    "parameters": {
+        "report": {
+            "name": "report",
+            "in": "path",
+            "description": "Name of report",
+            "required": true,
+            "type": "string"
+        }
+    },
     "definitions": {
         "ReportLink": {
             "description": "A link to a resource related to a report",
@@ -99,11 +108,7 @@
                 "operationId": "ReportResultSet",
                 "parameters": [
                     {
-                        "name": "report",
-                        "in": "path",
-                        "description": "Name of report",
-                        "required": true,
-                        "type": "string"
+                        "$ref": "#/parameters/report"
                     }
                 ],
                 "responses": {
@@ -123,11 +128,7 @@
                 "operationId": "ReportSearch",
                 "parameters": [
                     {
-                        "name": "report",
-                        "in": "path",
-                        "description": "Name of report",
-                        "required": true,
-                        "type": "string"
+                        "$ref": "#/parameters/report"
                     }
                 ],
                 "responses": {
