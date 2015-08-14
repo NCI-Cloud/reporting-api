@@ -4,6 +4,7 @@ import abc
 import webob.dec
 import webob.exc
 from common.specification import SwaggerSpecification
+from urlparse import parse_qs
 
 class Application(object):
 
@@ -169,7 +170,9 @@ class Application(object):
 			# Method specified in interface specification, but no matching Python method found
 			print self.__class__.__name__ + " has no method '%s'" % method_name
 			return webob.exc.HTTPNotImplemented()
-		result = method(req, method_params)
+		query_params = parse_qs(req.environ['QUERY_STRING'], True, True)
+		query_params.update(method_params)
+		result = method(req, query_params)
 		if isinstance(result, webob.exc.HTTPException):
 			return result
 		return self._build_response(req, result)
