@@ -88,6 +88,8 @@ class Application(object):
 
 	@classmethod
 	def _build_response(cls, req, return_value, headers = []):
+		if isinstance(return_value, webob.exc.WSGIHTTPException):
+			return return_value
 		swagger = req.environ['swagger']
 		spec = swagger['spec']
 		if 'operation' in swagger:
@@ -170,7 +172,13 @@ class Application(object):
 			# Method specified in interface specification, but no matching Python method found
 			print self.__class__.__name__ + " has no method '%s'" % method_name
 			return webob.exc.HTTPNotImplemented()
-		query_params = parse_qs(req.environ['QUERY_STRING'], True, True)
+		if ('QUERY_STRING' in req.environ) and req.environ['QUERY_STRING']:
+			try:
+				query_params = parse_qs(req.environ['QUERY_STRING'], True, True)
+			except ValueError:
+				return webob.exc.HTTPBadRequest()
+		else:
+			query_params = dict()
 		query_params.update(method_params)
 		result = method(req, query_params)
 		if isinstance(result, webob.exc.HTTPException):
