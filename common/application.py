@@ -99,9 +99,9 @@ class Application(object):
 		status = cls._expected_status(req, operation)
 		if not headers:
 			headers = []
+		headers.append(('Content-Type', 'application/json'))
 		return Response(
 			status = status,
-			content_type = 'application/json',
 			body = cls._pyob_to_json(cls._expected_obj(spec, operation, return_value)),
 			headers = headers
 		)
