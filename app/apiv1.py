@@ -1,5 +1,5 @@
 from datetime import datetime
-import re
+from common.sql import SQL
 import ConfigParser
 import MySQLdb
 from MySQLdb import cursors
@@ -12,7 +12,7 @@ class APIv1App(APIVersion):
 	def __init__(self, config_file):
 		self.config = config_file
 		self.dbname = self.config.get('database', 'dbname')
-		if not self._safe_sql_identifier(self.dbname):
+		if not SQL._safe_identifier(self.dbname):
 			raise ValueError("Unsafe DB name '%s'" % self.dbname)
 		self.dbconn = MySQLdb.connect(
 			host = self.config.get('database', 'hostname'),
@@ -37,17 +37,6 @@ class APIv1App(APIVersion):
 			self = '/v1/reports/' + report
 		)
 
-	@classmethod
-	def _safe_sql_identifier(cls, string):
-		"""
-		FIXME: How to defend against SQL injection?
-		The test below is primitive but effective.
-		PyMySQLdb has no placeholders for table names :-(
-		"""
-		if re.compile('^[a-zA-Z0-9_]*$').match(string):
-			return True
-		return False
-
 	def _before_db(self):
 		"""
 		MySQL-specific: attempt to reconnect if our connection has timed out
@@ -65,7 +54,7 @@ class APIv1App(APIVersion):
 		self._before_db()
 		cursor = self.dbconn.cursor(cursors.Cursor)
 		for table_name in table_names:
-			if not self._safe_sql_identifier(table_name):
+			if not SQL._safe_identifier(table_name):
 				return webob.exc.HTTPForbidden()
 		cursor.execute("SELECT table_comment FROM INFORMATION_SCHEMA.TABLES WHERE table_schema='" + self.dbname + "' AND table_name IN ('" + "','".join(table_names) + "');")
 		rows = cursor.fetchall()
@@ -78,7 +67,7 @@ class APIv1App(APIVersion):
 		self._before_db()
 		cursor = self.dbconn.cursor(cursors.Cursor)
 		for table_name in table_names:
-			if not self._safe_sql_identifier(table_name):
+			if not SQL._safe_identifier(table_name):
 				return webob.exc.HTTPForbidden()
 		cursor.execute("SELECT ts FROM metadata WHERE table_name IN ('" + "','".join(table_names) + "');")
 		return [ row[0] for row in cursor.fetchall() ]
@@ -108,15 +97,15 @@ class APIv1App(APIVersion):
 	def ReportResultSet(self, req, args):
 		table_name = args['report']
 		del args['report']
-		if not self._safe_sql_identifier(table_name):
+		if not SQL._safe_identifier(table_name):
 			return webob.exc.HTTPForbidden()
 		for (key, val) in args.items():
-			if not self._safe_sql_identifier(key):
+			if not SQL._safe_identifier(key):
 				return webob.exc.HTTPForbidden()
 			if len(val) != 1:
 				return webob.exc.HTTPBadRequest("No or multiple values passed for parameter '%s'" % key)
 			for ent in val:
-				if not self._safe_sql_identifier(ent):
+				if not SQL._safe_identifier(ent):
 					return webob.exc.HTTPForbidden()
 		headers = None
 		query = 'SELECT * FROM `' + table_name + '`'
