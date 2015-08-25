@@ -40,6 +40,7 @@ class APIv1App(APIVersion):
 		for table_name in table_names:
 			if not SQL._safe_identifier(table_name):
 				return webob.exc.HTTPForbidden()
+		# TODO: Use placeholders
 		query = "SELECT table_comment FROM INFORMATION_SCHEMA.TABLES WHERE table_schema='" + self.dbname + "' AND table_name IN ('" + "','".join(table_names) + "');"
 		rows = self.dbconn.execute(query, cursors.Cursor).fetchall()
 		return [ row[0] for row in rows]
@@ -51,6 +52,7 @@ class APIv1App(APIVersion):
 		for table_name in table_names:
 			if not SQL._safe_identifier(table_name):
 				return ( webob.exc.HTTPForbidden() )
+		# TODO: Use placeholders
 		query = "SELECT ts FROM metadata WHERE table_name IN ('" + "','".join(table_names) + "');"
 		cursor = self.dbconn.execute(query, cursors.Cursor)
 		return [ row[0] for row in cursor.fetchall() ]
@@ -80,10 +82,10 @@ class APIv1App(APIVersion):
 		table_name = args['report']
 		del args['report']
 		if not SQL._safe_identifier(table_name):
-			return webob.exc.HTTPForbidden()
+			return ( webob.exc.HTTPForbidden(), None )
 		for (key, val) in args.items():
 			if not SQL._safe_identifier(key):
-				return webob.exc.HTTPForbidden()
+				return ( webob.exc.HTTPForbidden(), None )
 			if len(val) != 1:
 				return webob.exc.HTTPBadRequest("No or multiple values passed for parameter '%s'" % key)
 			for ent in val:
@@ -91,12 +93,13 @@ class APIv1App(APIVersion):
 					return ( webob.exc.HTTPForbidden(), None )
 		headers = None
 		query = 'SELECT * FROM `' + table_name + '`'
-		# TODO: Use placeholders
+		parameters = []
 		if args:
 			query += ' WHERE '
 			criteria = []
 			for (key, val) in args.items():
-				criteria.append("`" + key + "`='" + val[0] + "'")
+				criteria.append("`" + key + "`=%s")
+				parameters.append(val[0])
 			query += ' AND '.join(criteria)
 		else:
 			# TODO: Add an Expires header and respond to conditional GETs
@@ -110,7 +113,7 @@ class APIv1App(APIVersion):
 			# Can't refresh the report. Degrade gracefully by serving old data.
 			pass
 		try:
-			cursor = self.dbconn.execute(query, cursors.DictCursor)
+			cursor = self.dbconn.execute(query, cursors.DictCursor, parameters)
 		except:
 			# Don't leak information about the database
 			return ( webob.exc.HTTPBadRequest(), None )

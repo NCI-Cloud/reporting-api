@@ -22,8 +22,12 @@ class DBConnection(object):
             """
             pass
 
-    def execute(self, query, cursor_class):
+    def execute(self, query, cursor_class, bind_values = None):
+        """
+        Execute the given query with the given values for placeholders.
+        Return a cursor of the given class.
+        """
         self._before_db()
         cursor = self.conn.cursor(cursor_class)
-        cursor.execute(query)
+        cursor.execute(query, bind_values)
         return cursor
