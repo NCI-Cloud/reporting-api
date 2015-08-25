@@ -78,7 +78,7 @@ class APIv1App(APIVersion):
 			if not SQL._safe_identifier(key):
 				return ( webob.exc.HTTPForbidden(), None )
 			if len(val) != 1:
-				return webob.exc.HTTPBadRequest("No or multiple values passed for parameter '%s'" % key)
+				return ( webob.exc.HTTPBadRequest("No or multiple values passed for parameter '%s'" % key), None )
 		headers = None
 		query = 'SELECT * FROM `' + table_name + '`'
 		parameters = []
