@@ -1,4 +1,3 @@
-import webob.exc
 from common.apiversion import APIVersion
 from common.application import Application
 

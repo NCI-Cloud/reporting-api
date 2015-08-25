@@ -1,11 +1,10 @@
 from datetime import datetime
 from common.sql import SQL
 import ConfigParser
-import MySQLdb
 from MySQLdb import cursors
-from _mysql_exceptions import OperationalError
 import webob.exc
 from common.apiversion import APIVersion
+from common.dbconn import DBConnection
 
 class APIv1App(APIVersion):
 
@@ -14,7 +13,7 @@ class APIv1App(APIVersion):
 		self.dbname = self.config.get('database', 'dbname')
 		if not SQL._safe_identifier(self.dbname):
 			raise ValueError("Unsafe DB name '%s'" % self.dbname)
-		self.dbconn = MySQLdb.connect(
+		self.dbconn = DBConnection(
 			host = self.config.get('database', 'hostname'),
 			user = self.config.get('database', 'username'),
 			passwd = self.config.get('database', 'password'),
@@ -37,39 +36,23 @@ class APIv1App(APIVersion):
 			self = '/v1/reports/' + report
 		)
 
-	def _before_db(self):
-		"""
-		MySQL-specific: attempt to reconnect if our connection has timed out
-		"""
-		try:
-			self.dbconn.ping(True)
-		except OperationalError:
-			"""
-			Probably just a stale connection.
-			If something worse has gone wrong, we will see it soon anyway.
-			"""
-			pass
-
 	def _get_tables_comments(self, table_names):
-		self._before_db()
-		cursor = self.dbconn.cursor(cursors.Cursor)
 		for table_name in table_names:
 			if not SQL._safe_identifier(table_name):
 				return webob.exc.HTTPForbidden()
-		cursor.execute("SELECT table_comment FROM INFORMATION_SCHEMA.TABLES WHERE table_schema='" + self.dbname + "' AND table_name IN ('" + "','".join(table_names) + "');")
-		rows = cursor.fetchall()
+		query = "SELECT table_comment FROM INFORMATION_SCHEMA.TABLES WHERE table_schema='" + self.dbname + "' AND table_name IN ('" + "','".join(table_names) + "');"
+		rows = self.dbconn.execute(query, cursors.Cursor).fetchall()
 		return [ row[0] for row in rows]
 
 	def _get_table_comment(self, table_name):
 		return self._get_tables_comments([ table_name ])[0]
 
 	def _get_table_lastupdates(self, table_names):
-		self._before_db()
-		cursor = self.dbconn.cursor(cursors.Cursor)
 		for table_name in table_names:
 			if not SQL._safe_identifier(table_name):
-				return webob.exc.HTTPForbidden()
-		cursor.execute("SELECT ts FROM metadata WHERE table_name IN ('" + "','".join(table_names) + "');")
+				return ( webob.exc.HTTPForbidden() )
+		query = "SELECT ts FROM metadata WHERE table_name IN ('" + "','".join(table_names) + "');"
+		cursor = self.dbconn.execute(query, cursors.Cursor)
 		return [ row[0] for row in cursor.fetchall() ]
 
 	def _get_table_lastupdate(self, table_name):
@@ -87,9 +70,8 @@ class APIv1App(APIVersion):
 			)
 
 	def ReportsList(self, req, args):
-		self._before_db()
-		cursor = self.dbconn.cursor(cursors.Cursor)
-		cursor.execute('SHOW TABLES;')
+		query = 'SHOW TABLES;'
+		cursor = self.dbconn.execute(query, cursors.Cursor)
 		rows = cursor.fetchall()
 		details = [ self._get_report_details(row[0]) for row in rows ]
 		return ( details, None )
@@ -106,9 +88,10 @@ class APIv1App(APIVersion):
 				return webob.exc.HTTPBadRequest("No or multiple values passed for parameter '%s'" % key)
 			for ent in val:
 				if not SQL._safe_identifier(ent):
-					return webob.exc.HTTPForbidden()
+					return ( webob.exc.HTTPForbidden(), None )
 		headers = None
 		query = 'SELECT * FROM `' + table_name + '`'
+		# TODO: Use placeholders
 		if args:
 			query += ' WHERE '
 			criteria = []
@@ -120,18 +103,17 @@ class APIv1App(APIVersion):
 			# headers.append(('Expires', ))
 			pass
 		query += ';'
-		self._before_db()
-		cursor = self.dbconn.cursor(cursors.DictCursor)
 		try:
-			cursor.execute('CALL ' + table_name + '_update();')
+			cursor = self.dbconn.execute('CALL ' + table_name + '_update();', cursors.DictCursor)
+			cursor.fetchall()
 		except:
 			# Can't refresh the report. Degrade gracefully by serving old data.
 			pass
 		try:
-			cursor.execute(query)
+			cursor = self.dbconn.execute(query, cursors.DictCursor)
 		except:
 			# Don't leak information about the database
-			return webob.exc.HTTPBadRequest()
+			return ( webob.exc.HTTPBadRequest(), None )
 		return ( cursor.fetchall(), headers )
 
 APIVersion.version_classes.append(APIv1App)

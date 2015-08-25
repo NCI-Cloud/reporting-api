@@ -2,13 +2,8 @@ import re
 
 class SQL(object):
     '''
-    Contains methods relating to SQl databases.
+    Contains methods relating to SQL databases.
     '''
-
-    def __init__(self, params):
-        '''
-        Constructor
-        '''
 
     @classmethod
     def _safe_identifier(cls, string):
