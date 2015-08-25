@@ -1,7 +1,6 @@
 from datetime import datetime
-from common.sql import SQL
 import ConfigParser
-from MySQLdb import cursors
+from MySQLdb import cursors, escape_string
 import webob.exc
 from common.apiversion import APIVersion
 from common.dbconn import DBConnection
@@ -11,8 +10,6 @@ class APIv1App(APIVersion):
 	def __init__(self, config_file):
 		self.config = config_file
 		self.dbname = self.config.get('database', 'dbname')
-		if not SQL._safe_identifier(self.dbname):
-			raise ValueError("Unsafe DB name '%s'" % self.dbname)
 		self.dbconn = DBConnection(
 			host = self.config.get('database', 'hostname'),
 			user = self.config.get('database', 'username'),
@@ -72,21 +69,14 @@ class APIv1App(APIVersion):
 	def ReportResultSet(self, req, args):
 		table_name = args['report']
 		del args['report']
-		if not SQL._safe_identifier(table_name):
-			return ( webob.exc.HTTPForbidden(), None )
-		for (key, val) in args.items():
-			if not SQL._safe_identifier(key):
-				return ( webob.exc.HTTPForbidden(), None )
-			if len(val) != 1:
-				return ( webob.exc.HTTPBadRequest("No or multiple values passed for parameter '%s'" % key), None )
 		headers = None
-		query = 'SELECT * FROM `' + table_name + '`'
+		query = 'SELECT * FROM ' + escape_string(table_name)
 		parameters = []
 		if args:
 			query += ' WHERE '
 			criteria = []
 			for (key, val) in args.items():
-				criteria.append("`" + key + "`=%s")
+				criteria.append(escape_string(key) + "=%s")
 				parameters.append(val[0])
 			query += ' AND '.join(criteria)
 		else:
