@@ -74,9 +74,7 @@ class APIv1App(APIVersion):
 	def ReportsList(self, req, args):
 		query = 'SHOW TABLES;'
 		cursor = self.dbconn.execute(query, cursors.Cursor)
-		rows = cursor.fetchall()
-		details = [ self._get_report_details(row[0]) for row in rows ]
-		return ( details, None )
+		return ( [ self._get_report_details(row[0]) for row in cursor.fetchall() ], None )
 
 	def ReportResultSet(self, req, args):
 		table_name = args['report']
