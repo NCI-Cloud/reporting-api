@@ -37,9 +37,6 @@ class APIv1App(APIVersion):
 		)
 
 	def _get_tables_comments(self, table_names):
-		for table_name in table_names:
-			if not SQL._safe_identifier(table_name):
-				return webob.exc.HTTPForbidden()
 		query = "SELECT table_comment FROM information_schema.tables WHERE table_schema=%s AND table_name IN (" + ",".join([ '%s' ] * len(table_names)) + ");"
 		parameters = [ self.dbname ]
 		parameters.extend(table_names)
@@ -49,9 +46,6 @@ class APIv1App(APIVersion):
 		return self._get_tables_comments([ table_name ])[0]
 
 	def _get_table_lastupdates(self, table_names):
-		for table_name in table_names:
-			if not SQL._safe_identifier(table_name):
-				return ( webob.exc.HTTPForbidden() )
 		query = "SELECT ts FROM metadata WHERE table_name IN (" + ",".join([ '%s' ] * len(table_names)) + ");"
 		cursor = self.dbconn.execute(query, cursors.Cursor, table_names)
 		return [ row[0] for row in cursor.fetchall() ]
@@ -85,9 +79,6 @@ class APIv1App(APIVersion):
 				return ( webob.exc.HTTPForbidden(), None )
 			if len(val) != 1:
 				return webob.exc.HTTPBadRequest("No or multiple values passed for parameter '%s'" % key)
-			for ent in val:
-				if not SQL._safe_identifier(ent):
-					return ( webob.exc.HTTPForbidden(), None )
 		headers = None
 		query = 'SELECT * FROM `' + table_name + '`'
 		parameters = []
