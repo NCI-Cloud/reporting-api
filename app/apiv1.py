@@ -40,10 +40,10 @@ class APIv1App(APIVersion):
 		for table_name in table_names:
 			if not SQL._safe_identifier(table_name):
 				return webob.exc.HTTPForbidden()
-		# TODO: Use placeholders
-		query = "SELECT table_comment FROM INFORMATION_SCHEMA.TABLES WHERE table_schema='" + self.dbname + "' AND table_name IN ('" + "','".join(table_names) + "');"
-		rows = self.dbconn.execute(query, cursors.Cursor).fetchall()
-		return [ row[0] for row in rows]
+		query = "SELECT table_comment FROM information_schema.tables WHERE table_schema=%s AND table_name IN (" + ",".join([ '%s' ] * len(table_names)) + ");"
+		parameters = [ self.dbname ]
+		parameters.extend(table_names)
+		return [ row[0] for row in self.dbconn.execute(query, cursors.Cursor, parameters).fetchall() ]
 
 	def _get_table_comment(self, table_name):
 		return self._get_tables_comments([ table_name ])[0]
@@ -52,9 +52,8 @@ class APIv1App(APIVersion):
 		for table_name in table_names:
 			if not SQL._safe_identifier(table_name):
 				return ( webob.exc.HTTPForbidden() )
-		# TODO: Use placeholders
-		query = "SELECT ts FROM metadata WHERE table_name IN ('" + "','".join(table_names) + "');"
-		cursor = self.dbconn.execute(query, cursors.Cursor)
+		query = "SELECT ts FROM metadata WHERE table_name IN (" + ",".join([ '%s' ] * len(table_names)) + ");"
+		cursor = self.dbconn.execute(query, cursors.Cursor, table_names)
 		return [ row[0] for row in cursor.fetchall() ]
 
 	def _get_table_lastupdate(self, table_name):
