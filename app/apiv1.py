@@ -1,9 +1,8 @@
-from datetime import datetime
 import ConfigParser
-from MySQLdb import cursors, escape_string
 import webob.exc
 from common.apiversion import APIVersion
 from common.dbconn import DBConnection
+from app.dbqueries import DBQueries
 
 class APIv1App(APIVersion):
 
@@ -23,79 +22,44 @@ class APIv1App(APIVersion):
 
 	@classmethod
 	def _get_links(cls):
+		# TODO: Obtain this from the Swagger specification(s)
 		return dict(
 			reports = '/v1/reports'
 		)
 
 	@classmethod
 	def _get_report_links(cls, report):
+		# TODO: Obtain this from the Swagger specification(s)
 		return dict(
 			self = '/v1/reports/' + report
 		)
 
-	def _get_tables_comments(self, table_names):
-		query = "SELECT table_comment FROM information_schema.tables WHERE table_schema=%s AND table_name IN (" + ",".join([ '%s' ] * len(table_names)) + ");"
-		parameters = [ self.dbname ]
-		parameters.extend(table_names)
-		return [ row[0] for row in self.dbconn.execute(query, cursors.Cursor, parameters).fetchall() ]
-
-	def _get_table_comment(self, table_name):
-		return self._get_tables_comments([ table_name ])[0]
-
-	def _get_table_lastupdates(self, table_names):
-		query = "SELECT ts FROM metadata WHERE table_name IN (" + ",".join([ '%s' ] * len(table_names)) + ");"
-		cursor = self.dbconn.execute(query, cursors.Cursor, table_names)
-		return [ row[0] for row in cursor.fetchall() ]
-
-	def _get_table_lastupdate(self, table_name):
-		rows = self._get_table_lastupdates([ table_name ])
-		if rows:
-			return rows[0]
-		return datetime.utcfromtimestamp(0).isoformat()
-
 	def _get_report_details(self, report_name):
 		return dict(
 				name = report_name,
-				description = self._get_table_comment(report_name),
-				lastUpdated = self._get_table_lastupdate(report_name),
+				description = DBQueries._get_table_comment(self.dbconn, self.dbname, report_name),
+				lastUpdated = DBQueries._get_table_lastupdate(self.dbconn, report_name),
 				links = self._get_report_links(report_name)
 			)
 
 	def ReportsList(self, req, args):
-		query = 'SHOW TABLES;'
-		cursor = self.dbconn.execute(query, cursors.Cursor)
-		return ( [ self._get_report_details(row[0]) for row in cursor.fetchall() ], None )
+		return ( [ self._get_report_details(report_name) for report_name in DBQueries._get_table_list(self.dbconn) ], None )
 
 	def ReportResultSet(self, req, args):
 		table_name = args['report']
 		del args['report']
-		headers = None
-		query = 'SELECT * FROM ' + escape_string(table_name)
-		parameters = []
 		if args:
-			query += ' WHERE '
-			criteria = []
-			for (key, val) in args.items():
-				criteria.append(escape_string(key) + "=%s")
-				parameters.append(val[0])
-			query += ' AND '.join(criteria)
+			headers = None
 		else:
 			# TODO: Add an Expires header and respond to conditional GETs
 			# headers.append(('Expires', ))
-			pass
-		query += ';'
+			headers = None
 		try:
-			cursor = self.dbconn.callproc(escape_string(table_name + '_update'), cursors.DictCursor)
-			cursor.fetchall()
-		except:
-			# Can't refresh the report. Degrade gracefully by serving old data.
-			pass
-		try:
-			cursor = self.dbconn.execute(query, cursors.DictCursor, parameters)
+			result_set = DBQueries._filter_table(self.dbconn, table_name, args)
 		except:
 			# Don't leak information about the database
 			return ( webob.exc.HTTPBadRequest(), None )
-		return ( cursor.fetchall(), headers )
+		return ( result_set, headers )
 
 APIVersion.version_classes.append(APIv1App)
 
