@@ -31,3 +31,13 @@ class DBConnection(object):
         cursor = self.conn.cursor(cursor_class)
         cursor.execute(query, bind_values)
         return cursor
+
+    def callproc(self, procname, cursor_class, args = []):
+        """
+        Execute the given-named stored procedure with the given arguments.
+        Return a cursor of the given class.
+        """
+        self._before_db()
+        cursor = self.conn.cursor(cursor_class)
+        cursor.callproc(procname, args)
+        return cursor

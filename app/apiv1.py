@@ -85,7 +85,7 @@ class APIv1App(APIVersion):
 			pass
 		query += ';'
 		try:
-			cursor = self.dbconn.execute('CALL ' + table_name + '_update();', cursors.DictCursor)
+			cursor = self.dbconn.callproc(escape_string(table_name + '_update'), cursors.DictCursor)
 			cursor.fetchall()
 		except:
 			# Can't refresh the report. Degrade gracefully by serving old data.
