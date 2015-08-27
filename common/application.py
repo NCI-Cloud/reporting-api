@@ -6,6 +6,7 @@ import webob.exc
 from common.specification import SwaggerSpecification
 from urlparse import parse_qs
 
+# TODO: Logging
 class Application(object):
 
 	def _get_method(self, func_name):
