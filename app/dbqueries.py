@@ -60,4 +60,4 @@ class DBQueries(object):
             pass
         query += ';'
         cursor = dbconn.execute(query, cursors.DictCursor, parameters)
-        return [ cursor.fetchall() ]
+        return cursor.fetchall()
