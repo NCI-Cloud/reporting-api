@@ -1,5 +1,5 @@
-import MySQLdb
-from _mysql_exceptions import OperationalError
+import mysql.connector
+from mysql.connector import InterfaceError
 
 class DBConnection(object):
     '''
@@ -7,7 +7,7 @@ class DBConnection(object):
     '''
 
     def __init__(self, **kwargs):
-        self.conn = MySQLdb.connect(**kwargs)
+        self.conn = mysql.connector.connect(**kwargs)
 
     def _before_db(self):
         """
@@ -15,29 +15,31 @@ class DBConnection(object):
         """
         try:
             self.conn.ping(True)
-        except OperationalError:
+        except InterfaceError:
             """
             Probably just a stale connection.
             If something worse has gone wrong, we will see it soon anyway.
             """
             pass
 
-    def execute(self, query, cursor_class, bind_values = None):
+    def execute(self, query, return_dictionaries = True, bind_values = None):
         """
         Execute the given query with the given values for placeholders.
-        Return a cursor of the given class.
+        If return_dictionaries is true, each row is a dictionary;
+        if it is false, each row is a list of column values.
+        In either case, a resultset is a list of rows.
         """
-        self._before_db()
-        cursor = self.conn.cursor(cursor_class)
+        cursor = self.conn.cursor(dictionary = return_dictionaries)
         cursor.execute(query, bind_values)
         return cursor
 
-    def callproc(self, procname, cursor_class, args = []):
+    def callproc(self, procname, return_dictionaries = True, args = []):
         """
         Execute the given-named stored procedure with the given arguments.
-        Return a cursor of the given class.
+        If return_dictionaries is true, each row is a dictionary;
+        if it is false, each row is a list of column values.
+        In either case, a resultset is a list of rows.
         """
-        self._before_db()
-        cursor = self.conn.cursor(cursor_class)
+        cursor = self.conn.cursor(dictionary = return_dictionaries)
         cursor.callproc(procname, args)
         return cursor

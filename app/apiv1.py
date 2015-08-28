@@ -12,8 +12,8 @@ class APIv1App(APIVersion):
 		self.dbconn = DBConnection(
 			host = self.config.get('database', 'hostname'),
 			user = self.config.get('database', 'username'),
-			passwd = self.config.get('database', 'password'),
-			db = self.dbname
+			password = self.config.get('database', 'password'),
+			database = self.dbname
 		)
 
 	@classmethod
