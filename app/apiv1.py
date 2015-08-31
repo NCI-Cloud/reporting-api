@@ -9,10 +9,15 @@ class APIv1App(APIVersion):
 	def __init__(self, config_file):
 		self.config = config_file
 		self.dbname = self.config.get('database', 'dbname')
-		self.dbconn = DBConnection(
-			host = self.config.get('database', 'hostname'),
-			user = self.config.get('database', 'username'),
-			password = self.config.get('database', 'password'),
+		self.dbhost = self.config.get('database', 'hostname')
+		self.dbuser = self.config.get('database', 'username')
+		self.dbpass = self.config.get('database', 'password')
+
+	def _connect_db(self):
+		return DBConnection(
+			host = self.dbhost,
+			user = self.dbuser,
+			password = self.dbpass,
 			database = self.dbname
 		)
 
@@ -34,18 +39,20 @@ class APIv1App(APIVersion):
 			self = '/v1/reports/' + report
 		)
 
-	def _get_report_details(self, report_name):
+	def _get_report_details(self, dbconn, report_name):
 		return dict(
 				name = report_name,
-				description = DBQueries._get_table_comment(self.dbconn, self.dbname, report_name),
-				lastUpdated = DBQueries._get_table_lastupdate(self.dbconn, report_name),
+				description = DBQueries._get_table_comment(dbconn, self.dbname, report_name),
+				lastUpdated = DBQueries._get_table_lastupdate(dbconn, report_name),
 				links = self._get_report_links(report_name)
 			)
 
 	def ReportsList(self, req, args):
-		return ( [ self._get_report_details(report_name) for report_name in DBQueries._get_table_list(self.dbconn) ], None )
+		dbconn = self._connect_db()
+		return ( [ self._get_report_details(dbconn, report_name) for report_name in DBQueries._get_table_list(dbconn) ], None )
 
 	def ReportResultSet(self, req, args):
+		dbconn = self._connect_db()
 		table_name = args['report']
 		del args['report']
 		if args:
@@ -55,7 +62,7 @@ class APIv1App(APIVersion):
 			# headers.append(('Expires', ))
 			headers = None
 		try:
-			result_set = DBQueries._filter_table(self.dbconn, table_name, args)
+			result_set = DBQueries._filter_table(dbconn, table_name, args)
 		except:
 			# Don't leak information about the database
 			return ( webob.exc.HTTPBadRequest(), None )
