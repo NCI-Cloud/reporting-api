@@ -16,7 +16,7 @@ class DBQueries(object):
 
     @classmethod
     def _get_table_lastupdates(cls, dbconn, table_names):
-        query = "SELECT ts FROM metadata WHERE table_name IN (" + ",".join([ '%s' ] * len(table_names)) + ");"
+        query = "SELECT last_update FROM metadata WHERE table_name IN (" + ",".join([ '%s' ] * len(table_names)) + ");"
         cursor = dbconn.execute(query, False, table_names)
         return [ row[0] for row in cursor.fetchall() ]
 
