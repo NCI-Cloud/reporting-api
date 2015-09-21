@@ -13,12 +13,12 @@ GET \
 "
 
 special_urls="\
-http://${ip}:9494/v1/reports/instances/?name=test \
-http://${ip}:9494/v1/reports/instances?name=test \
+http://${ip}:9494/v1/reports/instance/?name=test \
+http://${ip}:9494/v1/reports/instance?name=test \
 "
 
 urls="\
-http://${ip}:9494/v1/reports/projects \
+http://${ip}:9494/v1/reports/project \
 http://${ip}:9494/v1/reports \
 http://${ip}:9494/v1 \
 http://${ip}:9494 \
