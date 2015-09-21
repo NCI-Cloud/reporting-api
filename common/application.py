@@ -1,4 +1,4 @@
-import json
+from json import JSONEncoder
 from webob import Request, Response
 import abc
 import webob.dec
@@ -21,7 +21,8 @@ class Application(object):
 				return value.to_json()
 			else:
 				raise TypeError, 'Object of type %s with value of %s is not JSON serializable' % (type(value), repr(value))
-		return json.dumps(pyval, default = handler)
+		encoder = JSONEncoder(default = handler)
+		return encoder.iterencode(pyval)
 
 	@classmethod
 	def _expected_response(cls, operation):
@@ -103,7 +104,7 @@ class Application(object):
 		headers.append(('Content-Type', 'application/json'))
 		return Response(
 			status = status,
-			body = cls._pyob_to_json(cls._expected_obj(spec, operation, return_value)),
+			app_iter = cls._pyob_to_json(cls._expected_obj(spec, operation, return_value)),
 			headers = headers
 		)
 
