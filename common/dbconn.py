@@ -29,7 +29,8 @@ class DBConnection(object):
         if it is false, each row is a list of column values.
         In either case, a resultset is a list of rows.
         """
-        cursor = self.conn.cursor(dictionary = return_dictionaries)
+        """TODO: Don't buffer all rows client side"""
+        cursor = self.conn.cursor(dictionary = return_dictionaries, buffered = True)
         cursor.execute(query, bind_values)
         return cursor
 
@@ -40,6 +41,48 @@ class DBConnection(object):
         if it is false, each row is a list of column values.
         In either case, a resultset is a list of rows.
         """
-        cursor = self.conn.cursor(dictionary = return_dictionaries)
+        """TODO: Don't buffer all rows client side"""
+        cursor = self.conn.cursor(dictionary = return_dictionaries, buffered = True)
         cursor.callproc(procname, args)
         return cursor
+
+class CursorIter(object):
+
+    def __init__(self, cursor):
+        self.cursor = cursor
+
+    def next(self):
+        row = self.cursor.fetchone()
+        if row is None:
+            raise StopIteration()
+        return row
+
+class CursorSliceIter(CursorIter):
+
+    def __init__(self, cursor, index):
+        super(CursorSliceIter, self).__init__(cursor)
+        self.index = index
+
+    def next(self):
+        try:
+            row = super(CursorSliceIter, self).next()
+        except StopIteration:
+            raise
+        return row[self.index]
+
+class ResultSet(object):
+
+    def __init__(self, cursor):
+        self.cursor = cursor
+
+    def __iter__(self):
+        return CursorIter(self.cursor)
+
+class ResultSetSlice(ResultSet):
+
+    def __init__(self, cursor, index):
+        super(ResultSetSlice, self).__init__(cursor)
+        self.index = index
+
+    def __iter__(self):
+        return CursorSliceIter(self.cursor, self.index)

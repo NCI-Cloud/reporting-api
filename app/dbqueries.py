@@ -1,5 +1,6 @@
 from datetime import datetime
 from MySQLdb import escape_string
+from common.dbconn import ResultSet, ResultSetSlice
 
 class DBQueries(object):
 
@@ -8,30 +9,34 @@ class DBQueries(object):
         query = "SELECT table_comment FROM information_schema.tables WHERE table_schema=%s AND table_name IN (" + ",".join([ '%s' ] * len(table_names)) + ");"
         parameters = [ dbname ]
         parameters.extend(table_names)
-        return [ row[0] for row in dbconn.execute(query, False, parameters).fetchall() ]
+        cursor = dbconn.execute(query, False, parameters)
+        return ResultSetSlice(cursor, 0)
 
     @classmethod
     def _get_table_comment(cls, dbconn, dbname, table_name):
-        return cls._get_tables_comments(dbconn, dbname, [ table_name ])[0]
+        comments = cls._get_tables_comments(dbconn, dbname, [ table_name ])
+        return iter(comments).next()
 
     @classmethod
     def _get_table_lastupdates(cls, dbconn, table_names):
         query = "SELECT last_update FROM metadata WHERE table_name IN (" + ",".join([ '%s' ] * len(table_names)) + ");"
         cursor = dbconn.execute(query, False, table_names)
-        return [ row[0] for row in cursor.fetchall() ]
+        return ResultSetSlice(cursor, 0)
 
     @classmethod
     def _get_table_lastupdate(cls, dbconn, table_name):
         rows = cls._get_table_lastupdates(dbconn, [ table_name ])
-        if rows:
-            return rows[0]
-        return datetime.utcfromtimestamp(0).isoformat()
+        try:
+            row = iter(rows).next()
+        except StopIteration:
+            row = datetime.utcfromtimestamp(0).isoformat()
+        return row
 
     @classmethod
     def _get_table_list(cls, dbconn):
         query = 'SHOW TABLES;'
         cursor = dbconn.execute(query, False)
-        return [ row[0] for row in cursor.fetchall() ]
+        return ResultSetSlice(cursor, 0)
 
     @classmethod
     def _update_table(cls, dbconn, table_name):
@@ -60,4 +65,4 @@ class DBQueries(object):
             pass
         query += ';'
         cursor = dbconn.execute(query, True, parameters)
-        return cursor.fetchall()
+        return ResultSet(cursor)

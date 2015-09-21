@@ -66,7 +66,7 @@ class APIv1App(APIVersion):
 		except:
 			# Don't leak information about the database
 			return ( webob.exc.HTTPBadRequest(), None )
-		return ( result_set, headers )
+		return ( [ result for result in result_set ], headers )
 
 APIVersion.version_classes.append(APIv1App)
 
