@@ -29,8 +29,11 @@ class DBConnection(object):
         if it is false, each row is a list of column values.
         In either case, a resultset is a list of rows.
         """
-        """TODO: Don't buffer all rows client side"""
-        cursor = self.conn.cursor(dictionary = return_dictionaries, buffered = True)
+        cursor = self.conn.cursor(dictionary = return_dictionaries, buffered = False)
+        # Make this a strong not a weak reference, to prevent premature GC.
+        # Works around change:
+        # http://bazaar.launchpad.net/~mysql/myconnpy/1.0/revision/201
+        cursor._connection = self.conn
         cursor.execute(query, bind_values)
         return cursor
 
@@ -41,8 +44,7 @@ class DBConnection(object):
         if it is false, each row is a list of column values.
         In either case, a resultset is a list of rows.
         """
-        """TODO: Don't buffer all rows client side"""
-        cursor = self.conn.cursor(dictionary = return_dictionaries, buffered = True)
+        cursor = self.conn.cursor(dictionary = return_dictionaries, buffered = False)
         cursor.callproc(procname, args)
         return cursor
 

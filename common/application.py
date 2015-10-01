@@ -1,28 +1,16 @@
-from json import JSONEncoder
 from webob import Request, Response
 import abc
 import webob.dec
 import webob.exc
-from common.specification import SwaggerSpecification
 from urlparse import parse_qs
+from common.specification import SwaggerSpecification
+from common.encoder import JSONStreamingEncoder
 
 # TODO: Logging
 class Application(object):
 
 	def _get_method(self, func_name):
 		return getattr(self, func_name, None)
-
-	@classmethod
-	def _pyob_to_json(cls, pyval):
-		def handler(value):
-			if hasattr(value, 'isoformat'):
-				return value.isoformat()
-			elif hasattr(value, 'to_json'):
-				return value.to_json()
-			else:
-				raise TypeError, 'Object of type %s with value of %s is not JSON serializable' % (type(value), repr(value))
-		encoder = JSONEncoder(default = handler)
-		return encoder.iterencode(pyval)
 
 	@classmethod
 	def _expected_response(cls, operation):
@@ -52,59 +40,44 @@ class Application(object):
 		return body['schema']
 
 	@classmethod
-	def _coerce_to_array(cls, value):
-		if type(value) is list or type(value) is tuple:
-			return value
-		if type(value) is dict:
-			return [ value.items() ]
-		if value is None:
-			return []
-		return [ value ]
-
-	@classmethod
-	def _coerce_to_dict(cls, value):
-		if type(value) is list or type(value) is tuple:
-			return dict((index, value[index]) for index in range(len(value)))
-		if type(value) is dict:
-			return value
-		if value is None:
-			return dict()
-		return dict(value = value)
-
-	@classmethod
-	def _expected_obj(cls, spec, operation, return_value):
-		if operation is None:
-			if return_value is None:
-				return [];
-			if type(return_value) is list or type(return_value) is tuple or type(return_value) is dict:
-				return return_value
-			return [ return_value ]
-		else:
-			schema = cls._expected_schema(operation)
-			typ = spec._resolve_refs(schema)
-			if 'array' == typ:
-				return cls._coerce_to_array(return_value)
-			elif 'object' == typ:
-				return cls._coerce_to_dict(return_value)
-			raise ValueError("Cannot convert type '%s' into a valid JSON top-level type" % typ)
-
-	@classmethod
-	def _build_response(cls, req, return_value, headers = None):
-		if isinstance(return_value, webob.exc.WSGIHTTPException):
-			return return_value
+	def _build_response(cls, req, return_value_iter, headers = None):
+		"""
+		Build an HTTP response to the given request, with response body
+		containing the data output by the given iterator.
+		"""
+		if isinstance(return_value_iter, webob.exc.WSGIHTTPException):
+			return return_value_iter
 		swagger = req.environ['swagger']
 		spec = swagger['spec']
 		if 'operation' in swagger:
 			operation = swagger['operation']
 		else:
 			operation = None
+		if operation:
+			schema = cls._expected_schema(operation)
+			expected_type = spec._resolve_refs(schema)
+		else:
+			schema = None
+			expected_type = None
 		status = cls._expected_status(req, operation)
 		if not headers:
 			headers = []
 		headers.append(('Content-Type', 'application/json'))
+		if return_value_iter is None:
+			return_value_iter = iter()
+		if expected_type is None:
+			array_not_object = None
+		elif 'array' == expected_type:
+			array_not_object = True
+		elif 'object' == expected_type:
+			array_not_object = False
+		else:
+			raise ValueError("Cannot convert type '%s' into a valid JSON top-level type" % expected_type)
+		encoder = JSONStreamingEncoder()
+		json_iter = encoder.to_json(return_value_iter, array_not_object)
 		return Response(
 			status = status,
-			app_iter = cls._pyob_to_json(cls._expected_obj(spec, operation, return_value)),
+			app_iter = json_iter,
 			headers = headers
 		)
 
@@ -144,6 +117,7 @@ class Application(object):
 			if method_params:
 				method_name = method_params['method']
 			else:
+				# TODO: Include a link to the schema
 				return webob.exc.HTTPNotFound()
 		elif 'swagger' in req.environ:
 			swagger = req.environ['swagger']
@@ -153,11 +127,14 @@ class Application(object):
 			"""If no Swagger path matched, 404 Not Found"""
 			if path is None:
 				print "No path"
+				# TODO: Include a link to the schema
 				return webob.exc.HTTPNotFound()
 			"""If Swagger path matched, but no operation matched the HTTP method, HTTP Method Not Allowed"""
 			if operation is None:
 				print "Null operation"
 				print path
+				# TODO: Include an Allow header listing acceptable request methods
+				# TODO: Include a link to the schema
 				return webob.exc.HTTPMethodNotAllowed()
 			if 'operationId' not in operation:
 				# TODO: Check this condition at API spec load time
@@ -166,6 +143,7 @@ class Application(object):
 			method_params = swagger['parameters']
 		else:
 			print "Neither wsgiorg.routing_args nor swagger in environment"
+			# TODO: Include a link to the schema
 			return webob.exc.HTTPNotFound()
 			print req.environ
 		if method_name.startswith('_'):
