@@ -66,10 +66,7 @@ class CursorSliceIter(CursorIter):
         self.index = index
 
     def next(self):
-        try:
-            row = super(CursorSliceIter, self).next()
-        except StopIteration:
-            raise
+        row = super(CursorSliceIter, self).next()
         return row[self.index]
 
 class ResultSet(object):

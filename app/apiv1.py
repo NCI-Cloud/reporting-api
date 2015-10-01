@@ -49,7 +49,13 @@ class APIv1App(APIVersion):
 
 	def ReportsList(self, req, args):
 		dbconn = self._connect_db()
-		return ( [ self._get_report_details(dbconn, report_name) for report_name in DBQueries._get_table_list(dbconn) ], None )
+		report_name_iter = DBQueries._get_table_list(dbconn)
+		# The current resultset must be entirely read before another query
+		# can be performed on the same connection.
+		# This means we must either finish reading all report names before
+		# reading all report details, or must use multiple connections.
+		report_names = [ report_name for report_name in report_name_iter ]
+		return ( [ self._get_report_details(dbconn, report_name) for report_name in report_names ], None )
 
 	def ReportResultSet(self, req, args):
 		dbconn = self._connect_db()
