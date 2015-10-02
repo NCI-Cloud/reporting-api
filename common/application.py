@@ -105,12 +105,19 @@ class Application(object):
 		headers.append(('Allow', ','.join(methods)))
 		return cls._build_response(req, result, headers)
 
+	def _check_auth(self, req):
+		return True
+
 	@webob.dec.wsgify
 	def __call__(self, req_dict):
 		req = Request(req_dict.environ)
 		if "options" == req.environ['REQUEST_METHOD'].lower():
 			# Intercept this request to return an OPTIONS response
 			return self._options_response(req)
+		# Require valid authentication/authorisation from this point onward
+		if not self._check_auth(req):
+			# Authentication or authorisation failed
+			return webob.exc.HTTPUnauthorized
 		if 'wsgiorg.routing_args' in req.environ:
 			routing_args = req.environ['wsgiorg.routing_args']
 			method_params = routing_args[1]
