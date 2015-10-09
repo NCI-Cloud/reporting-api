@@ -1,8 +1,8 @@
 from abc import abstractmethod
 import abc
-from application import Application
+from authapp import KeystoneApplication
 
-class APIVersion(Application):
+class APIVersion(KeystoneApplication):
 
 	version_classes = []
 

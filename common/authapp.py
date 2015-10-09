@@ -1,7 +1,14 @@
-# An Application which uses Keystone for authentication and authorisation
-class KeystoneApplication(object):
+from common.application import Application
+
+class KeystoneApplication(Application):
+
+    """
+    An Application which uses Keystone for authorisation using RBAC
+    """
+
     def _check_auth(self, req):
-        keystone_protocol = self.config.get('keystone_protocol')
-        keystone_hostname = self.config.get('keystone_hostname')
-        keystone_port = self.config.get('keystone_port')
-        return True
+        required_role = self.config.get('authorisation', 'required_role')
+        if required_role is None:
+            raise ValueError("No required role supplied")
+        user_roles = req.env['HTTP_X_ROLES'].split(',')
+        return required_role in user_roles
