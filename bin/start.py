@@ -3,8 +3,10 @@
 import sys, os
 from paste.deploy import loadapp, loadserver
 from paste import httpserver
+import logging
 
 if __name__ == '__main__':
+	logging.basicConfig()
 	realfile = os.path.realpath(__file__)
 	realdir = os.path.dirname(realfile)
 	pardir = os.path.realpath(os.path.join(realdir, os.pardir))
