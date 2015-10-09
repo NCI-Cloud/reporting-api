@@ -7,28 +7,39 @@ if test -z "$ip" ; then
        ip=$(ip a|egrep 'inet[^6]'|fgrep -v 127.0.0.1|sed -r -e 's/.*inet ([0-9.]+).*/\1/g'|head -1)
 fi
 
+port=9494
+
+token=$(keystone token-get | egrep '^\|[ ]*id' | sed -r -e 's/^\|[ ]*id[ ]*\|[ ]*//g' | sed -r -e 's/[ ]*\|$//g')
+ret=$?
+if [ $ret -ne 0 ] ; then
+	echo "Failed to get Keystone token" 1>&2
+	exit $?
+fi
+
+auth="X-Auth-Token: $token"
+
 methods="\
 OPTIONS \
 GET \
 "
 
 special_urls="\
-http://${ip}:9494/v1/reports/instance/?name=test \
-http://${ip}:9494/v1/reports/instance?name=test \
+http://${ip}:${port}/v1/reports/instance/?name=test \
+http://${ip}:${port}/v1/reports/instance?name=test \
 "
 
 urls="\
-http://${ip}:9494/v1/reports/project \
-http://${ip}:9494/v1/reports \
-http://${ip}:9494/v1 \
-http://${ip}:9494 \
+http://${ip}:${port}/v1/reports/project \
+http://${ip}:${port}/v1/reports \
+http://${ip}:${port}/v1 \
+http://${ip}:${port} \
 "
 
 test_url() {
 	method="$1"
 	url="$2"
 	echo "${method} $url"
-	curl -X "$method" "$url"
+	curl -X "$method" -H "$auth" "$url"
 	ret=$?
 	echo
 	if [ $ret -ne 0 ] ; then
