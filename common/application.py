@@ -67,6 +67,7 @@ class Application(object):
 		if not headers:
 			headers = []
 		headers.append(('Content-Type', 'application/json'))
+		headers.append(('Vary', 'X-Auth-Token'))
 		if return_value_iter is None:
 			return_value_iter = iter()
 		if expected_type is None:
