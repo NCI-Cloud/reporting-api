@@ -9,5 +9,5 @@ class VersionsApp(Application):
 	def APIVersionDetails(self, req, params):
 		return ( APIVersion._api_version_detail(req), None )
 
-def factory(global_config, **settings):
+def app_factory(global_config, **settings):
 	return VersionsApp()

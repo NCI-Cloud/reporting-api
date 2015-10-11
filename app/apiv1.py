@@ -6,8 +6,8 @@ from app.dbqueries import DBQueries
 
 class APIv1App(APIVersion):
 
-	def __init__(self, config_file):
-		self.config = config_file
+	def __init__(self, configuration):
+		self.config = configuration
 		self.dbname = self.config.get('database', 'dbname')
 		self.dbhost = self.config.get('database', 'hostname')
 		self.dbuser = self.config.get('database', 'username')
@@ -76,9 +76,9 @@ class APIv1App(APIVersion):
 
 APIVersion.version_classes.append(APIv1App)
 
-def factory(global_config, **settings):
-	global_config.update(settings)
-	config_file = global_config.get('config_file', 'apiv1app.ini')
-	config = ConfigParser.SafeConfigParser()
-	config.read(config_file)
-	return APIv1App(config)
+def app_factory(global_config, **local_config):
+	global_config.update(local_config)
+	config_file_name = global_config.get('config_file', 'apiv1app.ini')
+	config_file = ConfigParser.SafeConfigParser()
+	config_file.read(config_file_name)
+	return APIv1App(config_file)
