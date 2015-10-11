@@ -8,6 +8,8 @@ if test -z "$ip" ; then
 fi
 
 port=9494
+verbose=
+# verbose=--verbose
 
 token=$(keystone token-get | egrep '^\|[ ]*id' | sed -r -e 's/^\|[ ]*id[ ]*\|[ ]*//g' | sed -r -e 's/[ ]*\|$//g')
 ret=$?
@@ -39,13 +41,14 @@ test_url() {
 	method="$1"
 	url="$2"
 	echo "${method} $url"
-	curl -X "$method" -H "$auth" "$url"
+	curl $verbose -X "$method" -H "$auth" "$url"
 	ret=$?
 	echo
 	if [ $ret -ne 0 ] ; then
 		echo "Error on ${method} of URL '$url'" 1>&2
 		exit $?
 	fi
+	# exit $?
 }
 
 for base_url in $urls ; do
