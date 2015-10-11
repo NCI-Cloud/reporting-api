@@ -9,6 +9,10 @@ from common.encoder import JSONStreamingEncoder
 # TODO: Logging
 class Application(object):
 
+	def __init__(self, configuration):
+		super(Application, self).__init__()
+		self.config = configuration
+
 	def _get_method(self, func_name):
 		return getattr(self, func_name, None)
 
@@ -121,7 +125,7 @@ class Application(object):
 		# Require valid authentication/authorisation from this point onward
 		if not self._check_auth(req):
 			# Authentication or authorisation failed
-			return webob.exc.HTTPUnauthorized()
+			return webob.exc.HTTPUnauthorized("Keystone authorisation failed")
 		if 'wsgiorg.routing_args' in req.environ:
 			routing_args = req.environ['wsgiorg.routing_args']
 			method_params = routing_args[1]

@@ -8,13 +8,16 @@ class KeystoneApplication(Application):
     An Application which uses Keystone for authorisation using RBAC
     """
 
-    def _check_auth(self, req):
-        required_role = self.config.get('authorisation', 'required_role')
-        if required_role is None:
+    def __init__(self, configuration):
+        super(KeystoneApplication, self).__init__(configuration)
+        self.required_role = self.config.get('authorisation', 'required_role')
+        if self.required_role is None:
             raise ValueError("No required role supplied")
+
+    def _check_auth(self, req):
         if 'HTTP_X_ROLES' in req.environ:
             user_roles = req.environ['HTTP_X_ROLES'].split(',')
-            return required_role in user_roles
+            return self.required_role in user_roles
         return False
 
 def keystone_auth_filter_factory(global_config, **local_config):
