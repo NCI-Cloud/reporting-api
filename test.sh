@@ -31,38 +31,42 @@ http://${ip}:${port}/v1/reports/instance?name=test \
 "
 
 urls="\
-http://${ip}:${port}/v1/reports/project \
+http://${ip}:${port}/v1/reports/flavour \
 http://${ip}:${port}/v1/reports \
 http://${ip}:${port}/v1 \
 http://${ip}:${port} \
 "
 
-test_url() {
-	method="$1"
-	url="$2"
+test_url_method() {
+	url="$1"
+	method="$2"
 	echo "${method} $url"
 	curl $verbose -X "$method" -H "$auth" "$url"
 	ret=$?
 	echo
 	if [ $ret -ne 0 ] ; then
 		echo "Error on ${method} of URL '$url'" 1>&2
-		exit $?
+		exit $ret
 	fi
-	# exit $?
+	# exit $ret
+}
+
+test_url_methods() {
+	url="$1"
+	shift
+	for method in "$@" ; do
+		test_url_method "$url" "$method"
+	done
 }
 
 for base_url in $urls ; do
 	for suffix in '' '/' ; do
 		url="${base_url}${suffix}"
-		for method in $methods ; do
-			test_url "$method" "$url"
-		done
+		test_url_methods "$url" $methods
 	done
 done
 for url in $special_urls ; do
-	for method in $methods ; do
-		test_url "$method" "$url"
-	done
+	test_url_methods "$url" $methods
 done
 
 echo "All tests successful"
