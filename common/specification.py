@@ -4,11 +4,29 @@ import json
 
 class SwaggerSpecification(object):
 
+    """
+    Represents a parsed Swagger API specification
+    """
+
     # The Swagger specification v2.0 mandates use of only these methods
     methods = [ 'get', 'put', 'post', 'delete', 'options', 'head', 'patch' ]
 
     def __init__(self, spec):
         self.spec = spec
+        self._validate_spec(self.spec)
+
+    @classmethod
+    def _validate_spec(cls, spec):
+        if 'paths' in spec:
+            paths = spec['paths']
+            for (pathpatt, pathdef) in paths.items():
+                for method in cls.methods:
+                    if method in pathdef:
+                        methoddef = pathdef[method]
+                        if not('operationId' in methoddef):
+                            raise ValueError("Missing operationId for " + method + " " + pathpatt)
+                        if not('responses' in methoddef) or len (methoddef['responses']) != 1:
+                            raise ValueError("Zero or multiple responses for " + method + " " + pathpatt)
 
     def _resolve_ref(self, ref):
         spec = self.spec
@@ -84,7 +102,7 @@ class SwaggerSpecification(object):
         return None
 
 if __name__ == '__main__':
-    swagger_files = 'conf/swagger_apiv1.json'
+    swagger_files = 'conf/swagger_versions.json conf/swagger_apiv1.json'
     specs = [
         SwaggerSpecification(
             json.loads(open(filename).read())
