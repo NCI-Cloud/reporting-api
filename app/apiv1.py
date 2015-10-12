@@ -78,7 +78,10 @@ APIVersion.version_classes.append(APIv1App)
 
 def app_factory(global_config, **local_config):
 	global_config.update(local_config)
-	config_file_name = global_config.get('config_file', 'apiv1app.ini')
+	config_file_name = global_config.get('config_file')
+	if not config_file_name:
+		raise ValueError('No config_file directive')
 	config_file = ConfigParser.SafeConfigParser()
-	config_file.read(config_file_name)
+	if not config_file.read(config_file_name):
+		raise ValueError("Cannot read config file '%s'" % config_file_name)
 	return APIv1App(config_file)
