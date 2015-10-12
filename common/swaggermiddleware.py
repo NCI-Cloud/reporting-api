@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
 import json
+import logging
+
 from common.specification import SwaggerSpecification
 
 class SwaggerMiddleware(object):
@@ -42,9 +44,9 @@ class SwaggerMiddleware(object):
 			swagger['operation'] = None
 
 	def __call__(self, environ, start_response):
-		# print "PATH_INFO: " + environ['PATH_INFO']
-		# print "SCRIPT_NAME: " + environ['SCRIPT_NAME']
-		# print self.specs
+		logging.debug("PATH_INFO: " + environ['PATH_INFO'])
+		logging.debug("SCRIPT_NAME: " + environ['SCRIPT_NAME'])
+		logging.debug(self.specs)
 		self._decorate_environment(environ)
 		return self.application(environ, start_response)
 

@@ -5,8 +5,8 @@ import webob.exc
 from urlparse import parse_qs
 from common.specification import SwaggerSpecification
 from common.encoder import JSONStreamingEncoder
+import logging
 
-# TODO: Logging
 class Application(object):
 
 	"""
@@ -167,18 +167,18 @@ class Application(object):
 				return webob.exc.HTTPNotFound()
 		elif 'swagger' in req.environ:
 			swagger = req.environ['swagger']
-			# print swagger
+			logging.debug(swagger)
 			path = swagger['path']
 			operation = swagger['operation']
 			"""If no Swagger path matched, 404 Not Found"""
 			if path is None:
-				print "No path"
+				logging.warning("No path matched requested URL")
 				# TODO: Include a link to the schema
 				return webob.exc.HTTPNotFound()
 			"""If Swagger path matched, but no operation matched the HTTP method, HTTP Method Not Allowed"""
 			if operation is None:
-				print "Null operation"
-				print path
+				logging.warning("No matching operation in path in API specification")
+				logging.debug(path)
 				# Include an Allow header listing acceptable request methods
 				headers = []
 				methods = self._allowed_methods(swagger, path)
@@ -191,17 +191,17 @@ class Application(object):
 			method_name = operation['operationId']
 			method_params = swagger['parameters']
 		else:
-			print "Neither wsgiorg.routing_args nor swagger in environment"
+			logging.error("Neither wsgiorg.routing_args nor swagger in environment")
+			logging.debug(req.environ)
 			# TODO: Include a link to the schema
 			return webob.exc.HTTPNotFound()
-			print req.environ
 		if method_name.startswith('_'):
 			# Attempt to call a private method
 			return webob.exc.HTTPForbidden()
 		method = self._get_method(method_name)
 		if method is None:
 			# Method specified in interface specification, but no matching Python method found
-			print self.__class__.__name__ + " has no method '%s'" % method_name
+			logging.warning(self.__class__.__name__ + " has no method '" + method_name + "'")
 			return webob.exc.HTTPNotImplemented()
 		if ('QUERY_STRING' in req.environ) and req.environ['QUERY_STRING']:
 			try:

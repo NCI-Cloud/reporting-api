@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import json
+import logging
 
 class SwaggerSpecification(object):
 
@@ -49,7 +50,7 @@ class SwaggerSpecification(object):
 
     @classmethod
     def _path_matches(cls, pattern, url):
-        # print "Testing URL '%s' against pattern '%s'" % (url, pattern)
+        logging.debug("Testing URL '%s' against pattern '%s'" % (url, pattern))
         path_parameters = dict()
         pattern_components = pattern.split('/')
         url_components = url.split('/')
@@ -70,7 +71,7 @@ class SwaggerSpecification(object):
         for comp in url_components[i:url_len]:
             if comp:
                 return [ False, [] ] # Trailing unmatched non-empty URL component
-        # print "Match: '%s' '%s'" % (url, pattern)
+        logging.debug("Match: '%s' '%s'" % (url, pattern))
         return [ True, path_parameters ]
 
     def _base_path(self):
@@ -84,13 +85,13 @@ class SwaggerSpecification(object):
     def _find_path(self, url):
         base_path = self._base_path()
         for path, pathdef in self._paths():
-            # print "BasePath: '%s'" % base_path
+            logging.debug("BasePath: '%s'" % base_path)
             [ matched, parameters ] = self._path_matches(base_path + path, url)
             if matched:
                 return [ pathdef, parameters ]
             """
             else:
-                print "Rejected URL '%s'" % url
+                logging.debug("Rejected URL '%s'" % url)
             """
         return [ None, None ]
 
