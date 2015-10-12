@@ -48,6 +48,7 @@ class Application(object):
 		"""
 		Build an HTTP response to the given request, with response body
 		containing the data output by the given iterator.
+		Tailor the response to the datatypes specified by Swagger, if any.
 		"""
 		if isinstance(return_value_iter, webob.exc.WSGIHTTPException):
 			return return_value_iter
@@ -127,6 +128,20 @@ class Application(object):
 
 	@webob.dec.wsgify
 	def __call__(self, req_dict):
+		"""
+		Match the given request in the Swagger specification.
+		Requires WSGI environment information from either SwaggerMapper
+		or SwaggerMiddleware.
+
+		Respond with one of several things:
+		- For an OPTIONS request, respond with part/all of the spec
+		- For an unauthorised request, an HTTP error
+		- For a request that doesn't map to an operationId in the schema,
+		  or maps to something not defined in Python, or maps to a private
+		  method whose name begins with an underscore, an HTTP error
+		- The result of calling self.<operationId>, which is expected to
+		  return a ( body, headers ) tuple.
+		"""
 		req = Request(req_dict.environ)
 		if "options" == req.environ['REQUEST_METHOD'].lower():
 			# Intercept this request to return an OPTIONS response

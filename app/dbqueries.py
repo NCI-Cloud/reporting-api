@@ -4,8 +4,16 @@ from common.dbconn import ResultSet, ResultSetSlice
 
 class DBQueries(object):
 
+    """
+    Holds a set of canned database queries.
+    """
+
     @classmethod
     def _get_tables_comments(cls, dbconn, dbname, table_names):
+        """
+        Return an iterator over the SQL92 table comments for the given tables.
+        """
+        # In this query, schema and table names are literals, so can be parameters
         query = "SELECT table_comment FROM information_schema.tables WHERE table_schema=%s AND table_name IN (" + ",".join([ '%s' ] * len(table_names)) + ");"
         parameters = [ dbname ]
         parameters.extend(table_names)
@@ -14,17 +22,29 @@ class DBQueries(object):
 
     @classmethod
     def _get_table_comment(cls, dbconn, dbname, table_name):
+        """
+        Obtain a single table's SQL92 table comment.
+        """
         comments = cls._get_tables_comments(dbconn, dbname, [ table_name ])
         return iter(comments).next()
 
     @classmethod
     def _get_table_lastupdates(cls, dbconn, table_names):
+        """
+        Return an iterator over the last update times for the given tables.
+        This is looked for in an optional table named 'metadata'.
+        FIXME: Remove this knowledge about the underlying schema.
+        """
+        # In this query, table names are literals, so can be parameters
         query = "SELECT last_update FROM metadata WHERE table_name IN (" + ",".join([ '%s' ] * len(table_names)) + ");"
         cursor = dbconn.execute(query, False, table_names)
         return ResultSetSlice(cursor, 0)
 
     @classmethod
     def _get_table_lastupdate(cls, dbconn, table_name):
+        """
+        Obtain a single table's last update time.
+        """
         rows = cls._get_table_lastupdates(dbconn, [ table_name ])
         try:
             row = iter(rows).next()
@@ -34,13 +54,21 @@ class DBQueries(object):
 
     @classmethod
     def _get_table_list(cls, dbconn):
+        """
+        Return an iterator over names of available tables.
+        """
         query = 'SHOW TABLES;'
         cursor = dbconn.execute(query, False)
         return ResultSetSlice(cursor, 0)
 
     @classmethod
     def _update_table(cls, dbconn, table_name):
+        """
+        Call a stored procedure to update the given-named table.
+        FIXME: Remove this knowledge about the underlying schema.
+        """
         try:
+            # Stored procedure names cannot be parameters, so must be escaped
             cursor = dbconn.callproc(escape_string(table_name + '_update'), True)
             cursor.fetchall()
         except:
@@ -49,20 +77,24 @@ class DBQueries(object):
 
     @classmethod
     def _filter_table(cls, dbconn, table_name, filter_args):
+        """
+        Return an iterator over the records in a resultset
+        selecting all columns from the given-named table.
+        The filter_args are ANDed together then used as a WHERE criterion.
+        """
         DBQueries._update_table(dbconn, table_name)
+        # Table names cannot be parameters, so must be escaped
         query = 'SELECT * FROM ' + escape_string(table_name)
         parameters = []
         if filter_args:
             query += ' WHERE '
             criteria = []
             for (key, val) in filter_args.items():
+                # Column names cannot be parameters, so must escaped
                 criteria.append(escape_string(key) + "=%s")
+                # Filter values can be parameters
                 parameters.append(val[0])
             query += ' AND '.join(criteria)
-        else:
-            # TODO: Add an Expires header and respond to conditional GETs
-            # headers.append(('Expires', ))
-            pass
         query += ';'
         cursor = dbconn.execute(query, True, parameters)
         return ResultSet(cursor)

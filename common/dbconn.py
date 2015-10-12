@@ -50,6 +50,10 @@ class DBConnection(object):
 
 class CursorIter(object):
 
+    """
+    Iterate over a cursor's emitted rows.
+    """
+
     def __init__(self, cursor):
         self.cursor = cursor
 
@@ -61,6 +65,11 @@ class CursorIter(object):
 
 class CursorSliceIter(CursorIter):
 
+    """
+    Iterate over a slice of a cursor's emitted rows,
+    so that the n'th column of each row is emitted.
+    """
+
     def __init__(self, cursor, index):
         super(CursorSliceIter, self).__init__(cursor)
         self.index = index
@@ -71,6 +80,10 @@ class CursorSliceIter(CursorIter):
 
 class ResultSet(object):
 
+    """
+    An iterable SQL result set.
+    """
+
     def __init__(self, cursor):
         self.cursor = cursor
 
@@ -78,6 +91,10 @@ class ResultSet(object):
         return CursorIter(self.cursor)
 
 class ResultSetSlice(ResultSet):
+
+    """
+    An iterable slice through an SQL result set.
+    """
 
     def __init__(self, cursor, index):
         super(ResultSetSlice, self).__init__(cursor)
