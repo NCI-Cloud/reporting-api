@@ -8,6 +8,12 @@ class DBQueries(object):
     Holds a set of canned database queries.
     """
 
+    UPDATE_PROC_SUFFIX = '_update'
+    QUERY_SHOW_TABLES = 'SHOW TABLES;'
+    METADATA_TABLE = 'metadata'
+    METADATA_LAST_UPDATE_COLUMN = 'last_update'
+    METADATA_TABLE_NAME_COLUMN = 'table_name'
+
     @classmethod
     def _get_tables_comments(cls, dbconn, dbname, table_names):
         """
@@ -36,7 +42,7 @@ class DBQueries(object):
         FIXME: Remove this knowledge about the underlying schema.
         """
         # In this query, table names are literals, so can be parameters
-        query = "SELECT last_update FROM metadata WHERE table_name IN (" + ",".join([ '%s' ] * len(table_names)) + ");"
+        query = "SELECT " + escape_string(cls.METADATA_LAST_UPDATE_COLUMN) + " FROM " + escape_string(cls.METADATA_TABLE) + " WHERE " + escape_string(cls.METADATA_TABLE_NAME_COLUMN) + " IN (" + ",".join([ '%s' ] * len(table_names)) + ");"
         cursor = dbconn.execute(query, False, table_names)
         return ResultSetSlice(cursor, 0)
 
@@ -57,19 +63,23 @@ class DBQueries(object):
         """
         Return an iterator over names of available tables.
         """
-        query = 'SHOW TABLES;'
+        query = cls.QUERY_SHOW_TABLES
         cursor = dbconn.execute(query, False)
         return ResultSetSlice(cursor, 0)
+
+    @classmethod
+    def _make_update_proc_name(cls, table_name):
+        # FIXME: Remove this knowledge about the underlying schema.
+        return table_name + cls.UPDATE_PROC_SUFFIX
 
     @classmethod
     def _update_table(cls, dbconn, table_name):
         """
         Call a stored procedure to update the given-named table.
-        FIXME: Remove this knowledge about the underlying schema.
         """
         try:
             # Stored procedure names cannot be parameters, so must be escaped
-            cursor = dbconn.callproc(escape_string(table_name + '_update'), True)
+            cursor = dbconn.callproc(escape_string(cls._make_update_proc_name(table_name)), True)
             cursor.fetchall()
         except:
             # Can't refresh the report. Degrade gracefully by serving old data.
