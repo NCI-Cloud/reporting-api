@@ -186,7 +186,7 @@ class Application(object):
 				# TODO: Include a link to the schema
 				return webob.exc.HTTPMethodNotAllowed(headers = headers)
 			if 'operationId' not in operation:
-				# TODO: Check this condition at API spec load time
+				# This condition is also checked at API spec load time
 				raise ValueError("No operationId in Swagger specification")
 			method_name = operation['operationId']
 			method_params = swagger['parameters']
