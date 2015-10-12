@@ -86,6 +86,18 @@ class Application(object):
 			headers = headers
 		)
 
+	@classmethod
+	def _allowed_methods(cls, spec, path):
+		if spec is None:
+			methods = []
+		elif path is None:
+			methods = [ method.upper() for method in SwaggerSpecification.methods if method != 'options' ]
+		else:
+			methods = [ method.upper() for method in SwaggerSpecification.methods if method != 'options' and method in path ]
+		# Synthesise an OPTIONS method
+		methods.append('OPTIONS')
+		return methods
+
 	"""
 	Respond to OPTIONS requests meaningfully,
 	implementing HATEOAS using the information in the Swagger catalogs.
@@ -95,17 +107,13 @@ class Application(object):
 		swagger = req.environ['swagger']
 		spec = swagger['spec']
 		path = swagger['path']
+		methods = cls._allowed_methods(spec, path)
 		if spec is None:
 			result = None
-			methods = []
 		elif path is None:
 			result = spec
-			methods = [ method.upper() for method in SwaggerSpecification.methods if method != 'options' ]
 		else:
 			result = path
-			methods = [ method.upper() for method in SwaggerSpecification.methods if method != 'options' and method in path ]
-		# Synthesise an OPTIONS method
-		methods.append('OPTIONS')
 		headers = []
 		headers.append(('Allow', ','.join(methods)))
 		return cls._build_response(req, result, headers)
@@ -149,9 +157,12 @@ class Application(object):
 			if operation is None:
 				print "Null operation"
 				print path
-				# TODO: Include an Allow header listing acceptable request methods
+				# Include an Allow header listing acceptable request methods
+				headers = []
+				methods = self._allowed_methods(swagger, path)
+				headers.append(('Allow', ','.join(methods)))
 				# TODO: Include a link to the schema
-				return webob.exc.HTTPMethodNotAllowed()
+				return webob.exc.HTTPMethodNotAllowed(headers = headers)
 			if 'operationId' not in operation:
 				# TODO: Check this condition at API spec load time
 				raise ValueError("No operationId in Swagger specification")
@@ -174,7 +185,7 @@ class Application(object):
 			try:
 				query_params = parse_qs(req.environ['QUERY_STRING'], True, True)
 			except ValueError:
-				return webob.exc.HTTPBadRequest()
+				return webob.exc.HTTPBadRequest("Failed to parse URL query parameters")
 		else:
 			query_params = dict()
 		query_params.update(method_params)
