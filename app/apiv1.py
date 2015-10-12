@@ -61,12 +61,12 @@ class APIv1App(APIVersion):
 		dbconn = self._connect_db()
 		table_name = args['report']
 		del args['report']
-		if args:
-			headers = None
-		else:
-			# TODO: Add an Expires header and respond to conditional GETs
-			# headers.append(('Expires', ))
-			headers = None
+		headers = None
+		# Handle conditional requests
+		if not args:
+			server_modified = DBQueries._get_table_lastupdate(dbconn, table_name)
+			if req.if_modified_since and req.if_modified_since >= server_modified:
+				return ( webob.exc.HTTPNotModified(), None )
 		try:
 			result_set = DBQueries._filter_table(dbconn, table_name, args)
 		except:
