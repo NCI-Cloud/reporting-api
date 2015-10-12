@@ -9,6 +9,13 @@ from common.encoder import JSONStreamingEncoder
 # TODO: Logging
 class Application(object):
 
+	"""
+	Abstract base class for a WSGI application configured by an INI file
+	which responds to requests according to a Swagger API specification.
+	"""
+
+	AUTH_FAILURE_MESSAGE = "Keystone authorisation failed"
+
 	def __init__(self, configuration):
 		super(Application, self).__init__()
 		self.config = configuration
@@ -149,7 +156,7 @@ class Application(object):
 		# Require valid authentication/authorisation from this point onward
 		if not self._check_auth(req):
 			# Authentication or authorisation failed
-			return webob.exc.HTTPUnauthorized("Keystone authorisation failed")
+			return webob.exc.HTTPUnauthorized(self.AUTH_FAILURE_MESSAGE)
 		if 'wsgiorg.routing_args' in req.environ:
 			routing_args = req.environ['wsgiorg.routing_args']
 			method_params = routing_args[1]
