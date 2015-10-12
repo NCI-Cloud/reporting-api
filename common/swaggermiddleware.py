@@ -51,7 +51,9 @@ class SwaggerMiddleware(object):
 def factory(config, **settings):
 	def filter(app):
 		config.update(settings)
-		swagger_files = config.get('swagger_json', 'swagger.json')
+		swagger_files = config.get('swagger_json')
+		if not swagger_files:
+			raise ValueError('No swagger_json specified')
 		specs = [
 			SwaggerSpecification(
 				json.loads(open(filename).read())
