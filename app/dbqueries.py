@@ -55,7 +55,7 @@ class DBQueries(object):
         try:
             row = iter(rows).next()
         except StopIteration:
-            row = datetime.utcfromtimestamp(0).isoformat()
+            row = datetime.utcfromtimestamp(0)
         return row
 
     @classmethod
