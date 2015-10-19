@@ -3,6 +3,8 @@ import webob.exc
 from common.apiversion import APIVersion
 from common.dbconn import DBConnection
 from app.dbqueries import DBQueries
+from wsgiref.handlers import format_date_time
+from time import mktime
 
 class APIv1App(APIVersion):
 
@@ -61,17 +63,17 @@ class APIv1App(APIVersion):
 		dbconn = self._connect_db()
 		table_name = args['report']
 		del args['report']
-		headers = None
+		server_modified = DBQueries._get_table_lastupdate(dbconn, table_name)
+		headers = [( 'Last-Modified', format_date_time(mktime(server_modified.timetuple())) )]
 		# Handle conditional requests
 		if not args:
-			server_modified = DBQueries._get_table_lastupdate(dbconn, table_name)
 			if req.if_modified_since and req.if_modified_since >= server_modified:
-				return ( webob.exc.HTTPNotModified(), None )
+				return ( webob.exc.HTTPNotModified(), headers )
 		try:
 			result_set = DBQueries._filter_table(dbconn, table_name, args)
 		except:
 			# Don't leak information about the database
-			return ( webob.exc.HTTPBadRequest(), None )
+			return ( webob.exc.HTTPBadRequest(), [] )
 		return ( result_set, headers )
 
 APIVersion.version_classes.append(APIv1App)
