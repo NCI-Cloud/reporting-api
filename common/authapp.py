@@ -17,6 +17,8 @@ class KeystoneApplication(Application):
             raise ValueError("No required role supplied")
 
     def _check_auth(self, req):
+        if not self.required_role:
+            return True
         if 'HTTP_X_ROLES' in req.environ:
             user_roles = req.environ['HTTP_X_ROLES'].split(',')
             return self.required_role in user_roles
