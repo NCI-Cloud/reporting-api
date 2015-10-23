@@ -80,8 +80,8 @@ class DBQueries(object):
             Despite the name, utcfromtimestamp returns a 'naive'
             datetime lacking any timezone, UTC or otherwise.
             """
-            row = datetime.utcfromtimestamp(0).replace(tzinfo = UTC())
-        return row
+            row = datetime.utcfromtimestamp(0)
+        return row.replace(tzinfo = UTC())
 
     @classmethod
     def _get_table_list(cls, dbconn):
