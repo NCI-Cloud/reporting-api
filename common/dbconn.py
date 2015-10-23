@@ -7,6 +7,16 @@ class DBConnection(object):
     '''
 
     def __init__(self, **kwargs):
+        """
+        MySQL stores TIMESTAMP values as UTC, but automatically converts them
+        to/from the 'current time zone' on output/input (respectively).
+        By default, the 'current time zone' is the server's time zone,
+        which is unknown to the client. Thus this is silent data corruption.
+        There is no way to disable this conversion, so defeat it by setting
+        the 'current time zone' to UTC upon connection.
+        """
+        if not('time_zone' in kwargs):
+            kwargs['time_zone'] = '+00:00'
         self.conn = mysql.connector.connect(**kwargs)
 
     def _before_db(self):
