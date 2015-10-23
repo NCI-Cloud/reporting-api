@@ -1,6 +1,27 @@
-from datetime import datetime
+from datetime import datetime, tzinfo, timedelta
 from MySQLdb import escape_string
 from common.dbconn import ResultSet, ResultSetSlice
+
+class UTC(tzinfo):
+
+    """
+    A timezone representing Coordinated Universal Time (UTC).
+    """
+
+    def utcoffset(self, dt):
+        """
+        UTC is always 0 offset from UTC.
+        """
+        return timedelta(0)
+
+    def dst(self, dt):
+        """
+        UTC never has a Daylight Savings Time offset.
+        """
+        return timedelta(0)
+
+    def tzname(self, dt):
+        return "UTC"
 
 class DBQueries(object):
 
@@ -55,7 +76,11 @@ class DBQueries(object):
         try:
             row = iter(rows).next()
         except StopIteration:
-            row = datetime.utcfromtimestamp(0)
+            """
+            Despite the name, utcfromtimestamp returns a 'naive'
+            datetime lacking any timezone, UTC or otherwise.
+            """
+            row = datetime.utcfromtimestamp(0).replace(tzinfo = UTC())
         return row
 
     @classmethod
