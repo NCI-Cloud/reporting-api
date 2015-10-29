@@ -29,7 +29,6 @@ class DBQueries(object):
     Holds a set of canned database queries.
     """
 
-    UPDATE_PROC_SUFFIX = '_update'
     QUERY_SHOW_TABLES = 'SHOW TABLES;'
     METADATA_TABLE = 'metadata'
     METADATA_LAST_UPDATE_COLUMN = 'last_update'
@@ -93,31 +92,12 @@ class DBQueries(object):
         return ResultSetSlice(cursor, 0)
 
     @classmethod
-    def _make_update_proc_name(cls, table_name):
-        # FIXME: Remove this knowledge about the underlying schema.
-        return table_name + cls.UPDATE_PROC_SUFFIX
-
-    @classmethod
-    def _update_table(cls, dbconn, table_name):
-        """
-        Call a stored procedure to update the given-named table.
-        """
-        try:
-            # Stored procedure names cannot be parameters, so must be escaped
-            cursor = dbconn.callproc(escape_string(cls._make_update_proc_name(table_name)), True)
-            cursor.fetchall()
-        except:
-            # Can't refresh the report. Degrade gracefully by serving old data.
-            pass
-
-    @classmethod
     def _filter_table(cls, dbconn, table_name, filter_args):
         """
         Return an iterator over the records in a resultset
         selecting all columns from the given-named table.
         The filter_args are ANDed together then used as a WHERE criterion.
         """
-        DBQueries._update_table(dbconn, table_name)
         # Table names cannot be parameters, so must be escaped
         query = 'SELECT * FROM ' + escape_string(table_name)
         parameters = []
