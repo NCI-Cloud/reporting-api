@@ -11,7 +11,7 @@ if __name__ == '__main__':
 	pardir = os.path.realpath(os.path.join(realdir, os.pardir))
 	confdir = os.path.join(pardir, 'conf')
 	paste_config = os.path.join(confdir, 'paste.config')
-	sys.path.append(pardir)
+	sys.path.insert(0, pardir)
 	reporting_app = loadapp('config:' + paste_config)
 	server = loadserver('config:' + paste_config)
 	server(reporting_app)
