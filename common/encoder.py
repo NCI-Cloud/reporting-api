@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import sys
 import json
 
@@ -132,15 +134,21 @@ def test_streaming_encoder(value):
     for chunk in enc.to_json(value):
         sys.stdout.write(chunk)
 
-def test_json_encoder(value):
-    encoder = json.JSONEncoder()
-    for chunk in encoder.iterencode(value):
-        sys.stdout.write(chunk)
+def test_encode_array():
+    arr = [ 'firstval', 'secondval' ]
+    test_streaming_encoder(arr)
 
-if __name__ == '__main__':
+def test_encode_dict():
+    dic = dict( firstkey = 'firstval', secondkey = 'secondval' )
+    test_streaming_encoder(dic)
+
+def test_encode_generator():
     def gen():
         yield 'firstval'
         yield 'secondval'
-    test_streaming_encoder([ 'firstval', 'secondval' ])
-    test_streaming_encoder(dict( firstkey = 'firstval', secondkey = 'secondval' ))
     test_streaming_encoder(gen())
+
+if __name__ == '__main__':
+    test_encode_array()
+    test_encode_dict()
+    test_encode_generator()

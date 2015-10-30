@@ -74,17 +74,28 @@ class Application(object):
 		status = cls._expected_status(req, operation)
 		if not headers:
 			headers = []
+		"""
+		TODO: XML response support, depending on content negotiation.
+		"""
 		headers.append(('Content-Type', 'application/json'))
+		"""
+		Our responses depend on whether or not correct authorisation was
+		supplied using a token.
+		"""
 		headers.append(('Vary', 'X-Auth-Token'))
 		if return_value_iter is None:
 			return_value_iter = iter()
 		if expected_type is None:
+			# Not sure what type to return
 			array_not_object = None
 		elif 'array' == expected_type:
+			# The specification says we're to return an array
 			array_not_object = True
 		elif 'object' == expected_type:
+			# The specification says we're to supply an object
 			array_not_object = False
 		else:
+			# A JSON response must be either an object or an array
 			raise ValueError("Cannot convert type '%s' into a valid JSON top-level type" % expected_type)
 		encoder = JSONStreamingEncoder()
 		json_iter = encoder.to_json(return_value_iter, array_not_object)
@@ -96,6 +107,11 @@ class Application(object):
 
 	@classmethod
 	def _allowed_methods(cls, spec, path):
+		"""
+		Which HTTP methods are allowed by the specification?
+		An OPTIONS method is permitted whether or not the specification
+		says so, since we synthesise those.
+		"""
 		if spec is None:
 			methods = []
 		elif path is None:
@@ -106,12 +122,12 @@ class Application(object):
 		methods.append('OPTIONS')
 		return methods
 
-	"""
-	Respond to OPTIONS requests meaningfully,
-	implementing HATEOAS using the information in the Swagger catalogs.
-	"""
 	@classmethod
 	def _options_response(cls, req):
+		"""
+		Respond to OPTIONS requests meaningfully,
+		implementing HATEOAS using the information in the Swagger catalogs.
+		"""
 		swagger = req.environ['swagger']
 		spec = swagger['spec']
 		path = swagger['path']
