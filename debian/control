@@ -1,0 +1,32 @@
+Source: reporting-api
+Maintainer: NCI Cloud Team <cloud.team@nci.org.au>
+Section: python
+Priority: optional
+Build-Depends: python-setuptools (>= 0.6b3), python (>= 2.6.6-3), debhelper (>= 9)
+Standards-Version: 3.9.1
+
+Package: python-reporting-api
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends}
+Description: OpenStack Reporting API
+ # reporting-api
+ OpenStack Reporting API
+ .
+ This is a stand-alone WSGI application modeled after other OpenStack components, intended to be used to serve relational and time-series data regarding cloud resource use.
+ .
+ Design and runtime configuration of this component's RESTful API is performed using a formal API specification, which is developed using the Swagger tool (http://swagger.io/).
+ .
+ # License
+ .
+ Copyright 2015 National Computational Infrastructure
+ .
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+ .
+        http://www.apache.org/licenses/LICENSE-2.0
+ .
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+
