@@ -13,7 +13,7 @@ class APIVersion(KeystoneApplication):
 
     @classmethod
     def _get_links(cls):
-        return []
+        return dict()
 
     @classmethod
     def _api_version_detail(cls, req):
