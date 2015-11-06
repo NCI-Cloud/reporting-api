@@ -3,6 +3,7 @@
 import json
 import logging
 
+
 class SwaggerSpecification(object):
 
     """
@@ -10,7 +11,7 @@ class SwaggerSpecification(object):
     """
 
     # The Swagger specification v2.0 mandates use of only these methods
-    methods = [ 'get', 'put', 'post', 'delete', 'options', 'head', 'patch' ]
+    methods = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch']
 
     def __init__(self, spec):
         self.spec = spec
@@ -25,9 +26,18 @@ class SwaggerSpecification(object):
                     if method in pathdef:
                         methoddef = pathdef[method]
                         if not('operationId' in methoddef):
-                            raise ValueError("Missing operationId for " + method + " " + pathpatt)
-                        if not('responses' in methoddef) or len (methoddef['responses']) != 1:
-                            raise ValueError("Zero or multiple responses for " + method + " " + pathpatt)
+                            raise ValueError(
+                                "Missing operationId for " +
+                                method + " " + pathpatt
+                            )
+                        if (
+                            not('responses' in methoddef) or
+                            len(methoddef['responses']) != 1
+                        ):
+                            raise ValueError(
+                                "Zero or multiple responses for " +
+                                method + " " + pathpatt
+                            )
 
     def _resolve_ref(self, ref):
         spec = self.spec
@@ -37,7 +47,9 @@ class SwaggerSpecification(object):
         components = ref.split('/')
         for comp in components:
             if comp not in spec:
-                raise ValueError("No definition component '%s' in spec '%s'" % (comp, spec))
+                raise ValueError(
+                    "No definition component '%s' in spec '%s'" % (comp, spec)
+                )
             spec = spec[comp]
         return spec
 
@@ -59,20 +71,27 @@ class SwaggerSpecification(object):
         for i in range(0, min(patt_len, url_len)):
             patt_comp = pattern_components[i]
             url_comp = url_components[i]
-            if patt_comp.startswith('{') and patt_comp.endswith('}') and url_comp:
+            if (
+                patt_comp.startswith('{') and
+                patt_comp.endswith('}') and
+                url_comp
+            ):
                 # Pattern component matched
                 path_parameters[patt_comp[1:-1]] = url_comp
             elif patt_comp != url_comp:
-                return [ False, [] ] # Literal component mismatch
+                # Literal component mismatch
+                return [False, []]
         i += 1
         for comp in pattern_components[i:patt_len]:
             if comp:
-                return [ False, [] ] # Trailing unmatched non-empty path pattern component
+                # Trailing unmatched non-empty path pattern component
+                return [False, []]
         for comp in url_components[i:url_len]:
             if comp:
-                return [ False, [] ] # Trailing unmatched non-empty URL component
+                # Trailing unmatched non-empty URL component
+                return [False, []]
         logging.debug("Match: '%s' '%s'" % (url, pattern))
-        return [ True, path_parameters ]
+        return [True, path_parameters]
 
     def _base_path(self):
         if 'basePath' in self.spec:
@@ -86,14 +105,14 @@ class SwaggerSpecification(object):
         base_path = self._base_path()
         for path, pathdef in self._paths():
             logging.debug("BasePath: '%s'" % base_path)
-            [ matched, parameters ] = self._path_matches(base_path + path, url)
+            [matched, parameters] = self._path_matches(base_path + path, url)
             if matched:
-                return [ pathdef, parameters ]
+                return [pathdef, parameters]
             """
             else:
                 logging.debug("Rejected URL '%s'" % url)
             """
-        return [ None, None ]
+        return [None, None]
 
     @classmethod
     def _find_operation(cls, pathdef, request_method):

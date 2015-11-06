@@ -2,6 +2,7 @@ from datetime import datetime, tzinfo, timedelta
 from MySQLdb import escape_string
 from reporting.common.dbconn import ResultSet, ResultSetSlice
 
+
 class UTC(tzinfo):
 
     """
@@ -23,6 +24,7 @@ class UTC(tzinfo):
     def tzname(self, dt):
         return "UTC"
 
+
 class DBQueries(object):
 
     """
@@ -39,9 +41,20 @@ class DBQueries(object):
         """
         Return an iterator over the SQL92 table comments for the given tables.
         """
-        # In this query, schema and table names are literals, so can be parameters
-        query = "SELECT table_comment FROM information_schema.tables WHERE table_schema=%s AND table_name IN (" + ",".join([ '%s' ] * len(table_names)) + ");"
-        parameters = [ dbname ]
+        # In this query, schema and table names are literals,
+        # so can be parameters
+        query = """
+        SELECT
+            table_comment
+        FROM
+            information_schema.tables
+        WHERE
+            table_schema=%s
+            AND table_name IN (
+        """ \
+            + ",".join(['%s'] * len(table_names)) \
+            + ");"
+        parameters = [dbname]
         parameters.extend(table_names)
         cursor = dbconn.execute(query, False, parameters)
         return ResultSetSlice(cursor, 0)
@@ -51,7 +64,7 @@ class DBQueries(object):
         """
         Obtain a single table's SQL92 table comment.
         """
-        comments = cls._get_tables_comments(dbconn, dbname, [ table_name ])
+        comments = cls._get_tables_comments(dbconn, dbname, [table_name])
         return iter(comments).next()
 
     @classmethod
@@ -62,7 +75,10 @@ class DBQueries(object):
         FIXME: Remove this knowledge about the underlying schema.
         """
         # In this query, table names are literals, so can be parameters
-        query = "SELECT " + escape_string(cls.METADATA_LAST_UPDATE_COLUMN) + " FROM " + escape_string(cls.METADATA_TABLE) + " WHERE " + escape_string(cls.METADATA_TABLE_NAME_COLUMN) + " IN (" + ",".join([ '%s' ] * len(table_names)) + ");"
+        query = "SELECT " + escape_string(cls.METADATA_LAST_UPDATE_COLUMN) \
+            + " FROM " + escape_string(cls.METADATA_TABLE) \
+            + " WHERE " + escape_string(cls.METADATA_TABLE_NAME_COLUMN) \
+            + " IN (" + ",".join(['%s'] * len(table_names)) + ");"
         cursor = dbconn.execute(query, False, table_names)
         return ResultSetSlice(cursor, 0)
 
@@ -71,7 +87,7 @@ class DBQueries(object):
         """
         Obtain a single table's last update time.
         """
-        rows = cls._get_table_lastupdates(dbconn, [ table_name ])
+        rows = cls._get_table_lastupdates(dbconn, [table_name])
         try:
             row = iter(rows).next()
         except StopIteration:
@@ -80,7 +96,7 @@ class DBQueries(object):
             datetime lacking any timezone, UTC or otherwise.
             """
             row = datetime.utcfromtimestamp(0)
-        return row.replace(tzinfo = UTC())
+        return row.replace(tzinfo=UTC())
 
     @classmethod
     def _get_table_list(cls, dbconn):

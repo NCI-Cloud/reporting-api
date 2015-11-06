@@ -1,6 +1,7 @@
 import mysql.connector
 from mysql.connector import InterfaceError
 
+
 class DBConnection(object):
     '''
     Represents a connection to an RDBMS.
@@ -32,14 +33,16 @@ class DBConnection(object):
             """
             pass
 
-    def execute(self, query, return_dictionaries = True, bind_values = None):
+    def execute(self, query, return_dictionaries=True, bind_values=None):
         """
         Execute the given query with the given values for placeholders.
         If return_dictionaries is true, each row is a dictionary;
         if it is false, each row is a list of column values.
         In either case, a resultset is a list of rows.
         """
-        cursor = self.conn.cursor(dictionary = return_dictionaries, buffered = False)
+        cursor = self.conn.cursor(
+            dictionary=return_dictionaries, buffered=False
+        )
         # Make this a strong not a weak reference, to prevent premature GC.
         # Works around change:
         # http://bazaar.launchpad.net/~mysql/myconnpy/1.0/revision/201
@@ -47,16 +50,19 @@ class DBConnection(object):
         cursor.execute(query, bind_values)
         return cursor
 
-    def callproc(self, procname, return_dictionaries = True, args = []):
+    def callproc(self, procname, return_dictionaries=True, args=[]):
         """
         Execute the given-named stored procedure with the given arguments.
         If return_dictionaries is true, each row is a dictionary;
         if it is false, each row is a list of column values.
         In either case, a resultset is a list of rows.
         """
-        cursor = self.conn.cursor(dictionary = return_dictionaries, buffered = False)
+        cursor = self.conn.cursor(
+            dictionary=return_dictionaries, buffered=False
+        )
         cursor.callproc(procname, args)
         return cursor
+
 
 class CursorIter(object):
 
@@ -73,6 +79,7 @@ class CursorIter(object):
             raise StopIteration()
         return row
 
+
 class CursorSliceIter(CursorIter):
 
     """
@@ -88,6 +95,7 @@ class CursorSliceIter(CursorIter):
         row = super(CursorSliceIter, self).next()
         return row[self.index]
 
+
 class ResultSet(object):
 
     """
@@ -99,6 +107,7 @@ class ResultSet(object):
 
     def __iter__(self):
         return CursorIter(self.cursor)
+
 
 class ResultSetSlice(ResultSet):
 

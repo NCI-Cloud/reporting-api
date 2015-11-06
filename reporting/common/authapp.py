@@ -2,6 +2,7 @@ import ConfigParser
 from reporting.common.application import Application
 from keystonemiddleware.auth_token import filter_factory as auth_filter_factory
 
+
 class KeystoneApplication(Application):
 
     """
@@ -23,6 +24,7 @@ class KeystoneApplication(Application):
             user_roles = req.environ['HTTP_X_ROLES'].split(',')
             return self.required_role in user_roles
         return False
+
 
 def keystone_auth_filter_factory(global_config, **local_config):
     global_config.update(local_config)
