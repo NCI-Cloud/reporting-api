@@ -25,13 +25,13 @@ class SwaggerSpecification(object):
                 for method in cls.methods:
                     if method in pathdef:
                         methoddef = pathdef[method]
-                        if not('operationId' in methoddef):
+                        if 'operationId' not in methoddef:
                             raise ValueError(
                                 "Missing operationId for " +
                                 method + " " + pathpatt
                             )
                         if (
-                            not('responses' in methoddef) or
+                            'responses' not in methoddef or
                             len(methoddef['responses']) != 1
                         ):
                             raise ValueError(

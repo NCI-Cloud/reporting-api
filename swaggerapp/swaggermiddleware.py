@@ -37,13 +37,13 @@ class SwaggerMiddleware(object):
                     )
                     if swagger['operation'] is not None:
                         break
-        if not('spec' in swagger):
+        if 'spec' not in swagger:
             swagger['spec'] = None
-        if not('path' in swagger):
+        if 'path' not in swagger:
             swagger['path'] = None
-        if not('parameters' in swagger):
+        if 'parameters' not in swagger:
             swagger['parameters'] = None
-        if not('operation' in swagger):
+        if 'operation' not in swagger:
             swagger['operation'] = None
 
     def __call__(self, environ, start_response):

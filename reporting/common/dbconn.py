@@ -16,7 +16,7 @@ class DBConnection(object):
         There is no way to disable this conversion, so defeat it by setting
         the 'current time zone' to UTC upon connection.
         """
-        if not('time_zone' in kwargs):
+        if 'time_zone' not in kwargs:
             kwargs['time_zone'] = '+00:00'
         self.conn = mysql.connector.connect(**kwargs)
 
