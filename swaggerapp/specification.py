@@ -53,7 +53,7 @@ class SwaggerSpecification(object):
             spec = spec[comp]
         return spec
 
-    def _resolve_refs(self, schema):
+    def resolve_refs(self, schema):
         while '$ref' in schema:
             schema = self._resolve_ref(schema['$ref'])
         if 'type' in schema:
@@ -101,7 +101,7 @@ class SwaggerSpecification(object):
     def _paths(self):
         return self.spec['paths'].items()
 
-    def _find_path(self, url):
+    def find_path(self, url):
         base_path = self._base_path()
         for path, pathdef in self._paths():
             logging.debug("BasePath: '%s'" % base_path)
@@ -115,7 +115,7 @@ class SwaggerSpecification(object):
         return [None, None]
 
     @classmethod
-    def _find_operation(cls, pathdef, request_method):
+    def find_operation(cls, pathdef, request_method):
         request_method = request_method.lower()
         if request_method in pathdef:
             return pathdef[request_method]

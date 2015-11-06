@@ -37,7 +37,7 @@ class DBQueries(object):
     METADATA_TABLE_NAME_COLUMN = 'table_name'
 
     @classmethod
-    def _get_tables_comments(cls, dbconn, dbname, table_names):
+    def get_tables_comments(cls, dbconn, dbname, table_names):
         """
         Return an iterator over the SQL92 table comments for the given tables.
         """
@@ -60,15 +60,15 @@ class DBQueries(object):
         return ResultSetSlice(cursor, 0)
 
     @classmethod
-    def _get_table_comment(cls, dbconn, dbname, table_name):
+    def get_table_comment(cls, dbconn, dbname, table_name):
         """
         Obtain a single table's SQL92 table comment.
         """
-        comments = cls._get_tables_comments(dbconn, dbname, [table_name])
+        comments = cls.get_tables_comments(dbconn, dbname, [table_name])
         return iter(comments).next()
 
     @classmethod
-    def _get_table_lastupdates(cls, dbconn, table_names):
+    def get_table_lastupdates(cls, dbconn, table_names):
         """
         Return an iterator over the last update times for the given tables.
         This is looked for in an optional table named 'metadata'.
@@ -83,11 +83,11 @@ class DBQueries(object):
         return ResultSetSlice(cursor, 0)
 
     @classmethod
-    def _get_table_lastupdate(cls, dbconn, table_name):
+    def get_table_lastupdate(cls, dbconn, table_name):
         """
         Obtain a single table's last update time.
         """
-        rows = cls._get_table_lastupdates(dbconn, [table_name])
+        rows = cls.get_table_lastupdates(dbconn, [table_name])
         try:
             row = iter(rows).next()
         except StopIteration:
@@ -99,7 +99,7 @@ class DBQueries(object):
         return row.replace(tzinfo=UTC())
 
     @classmethod
-    def _get_table_list(cls, dbconn):
+    def get_table_list(cls, dbconn):
         """
         Return an iterator over names of available tables.
         """
@@ -108,7 +108,7 @@ class DBQueries(object):
         return ResultSetSlice(cursor, 0)
 
     @classmethod
-    def _filter_table(cls, dbconn, table_name, filter_args):
+    def filter_table(cls, dbconn, table_name, filter_args):
         """
         Return an iterator over the records in a resultset
         selecting all columns from the given-named table.

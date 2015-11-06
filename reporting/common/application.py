@@ -68,7 +68,7 @@ class Application(object):
             operation = None
         if operation:
             schema = cls._expected_schema(operation)
-            expected_type = spec._resolve_refs(schema)
+            expected_type = spec.resolve_refs(schema)
         else:
             schema = None
             expected_type = None

@@ -45,10 +45,10 @@ class APIv1App(APIVersion):
     def _get_report_details(self, dbconn, report_name):
         return dict(
                 name=report_name,
-                description=DBQueries._get_table_comment(
+                description=DBQueries.get_table_comment(
                     dbconn, self.dbname, report_name
                 ),
-                lastUpdated=DBQueries._get_table_lastupdate(
+                lastUpdated=DBQueries.get_table_lastupdate(
                     dbconn, report_name
                 ),
                 links=self._get_report_links(report_name)
@@ -56,7 +56,7 @@ class APIv1App(APIVersion):
 
     def ReportsList(self, req, args):
         dbconn = self._connect_db()
-        report_name_iter = DBQueries._get_table_list(dbconn)
+        report_name_iter = DBQueries.get_table_list(dbconn)
         # The current resultset must be entirely read before another query
         # can be performed on the same connection.
         # This means we must either finish reading all report names before
@@ -71,7 +71,7 @@ class APIv1App(APIVersion):
         dbconn = self._connect_db()
         table_name = args['report']
         del args['report']
-        server_modified = DBQueries._get_table_lastupdate(dbconn, table_name)
+        server_modified = DBQueries.get_table_lastupdate(dbconn, table_name)
         headers = [(
             'Last-Modified',
             format_date_time(mktime(server_modified.timetuple()))
@@ -81,7 +81,7 @@ class APIv1App(APIVersion):
             if req.if_modified_since and req.if_modified_since >= server_modified:
                 return ( webob.exc.HTTPNotModified(), headers )
         try:
-            result_set = DBQueries._filter_table(dbconn, table_name, args)
+            result_set = DBQueries.filter_table(dbconn, table_name, args)
         except:
             # Don't leak information about the database
             return (webob.exc.HTTPBadRequest(), [])

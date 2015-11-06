@@ -27,12 +27,12 @@ class SwaggerMiddleware(object):
             pathdef = swagger['path']
         else:
             for spec in self.specs:
-                [pathdef, path_parameters] = spec._find_path(url)
+                [pathdef, path_parameters] = spec.find_path(url)
                 if pathdef is not None:
                     swagger['spec'] = spec
                     swagger['path'] = pathdef
                     swagger['parameters'] = path_parameters
-                    swagger['operation'] = spec._find_operation(
+                    swagger['operation'] = spec.find_operation(
                         pathdef, environ['REQUEST_METHOD']
                     )
                     if swagger['operation'] is not None:
