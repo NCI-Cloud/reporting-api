@@ -7,7 +7,7 @@ class VersionsApp(Application):
     def __init__(self):
         super(VersionsApp, self).__init__(None)
 
-    def APIVersionList(self, req, args):
+    def operation_APIVersionList(self, req, args):
         return (
             [
                 version._api_version_detail(req)
@@ -16,7 +16,7 @@ class VersionsApp(Application):
             None
         )
 
-    def APIVersionDetails(self, req, params):
+    def operation_APIVersionDetails(self, req, params):
         return (APIVersion._api_version_detail(req), None)
 
 

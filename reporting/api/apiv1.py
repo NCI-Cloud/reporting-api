@@ -54,7 +54,7 @@ class APIv1App(APIVersion):
                 links=self._get_report_links(report_name)
             )
 
-    def ReportsList(self, req, args):
+    def operation_ReportsList(self, req, args):
         dbconn = self._connect_db()
         report_name_iter = DBQueries.get_table_list(dbconn)
         # The current resultset must be entirely read before another query
@@ -67,7 +67,7 @@ class APIv1App(APIVersion):
             for report_name in report_names
         ], None)
 
-    def ReportResultSet(self, req, args):
+    def operation_ReportResultSet(self, req, args):
         dbconn = self._connect_db()
         table_name = args['report']
         del args['report']

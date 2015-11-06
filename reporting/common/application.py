@@ -216,7 +216,7 @@ class Application(object):
             if 'operationId' not in operation:
                 # This condition is also checked at API spec load time
                 raise ValueError("No operationId in Swagger specification")
-            method_name = operation['operationId']
+            method_name = 'operation_' + operation['operationId']
             method_params = swagger['parameters']
         else:
             logging.error(
