@@ -8,8 +8,20 @@ if test -z "$ip" ; then
 fi
 
 port=9494
+
 verbose=
 # verbose=--verbose
+
+# This requests HTTP Transfer Encoding, which the server doesn't support,
+# because browsers don't support it. It would be strictly correct, however.
+# compressed=--tr-encoding
+
+# This requests HTTP Content Encoding, which the server supports.
+# Curl then automatically decompresses the response, which is incorrect,
+# as that should only happen when using Transfer Encoding.
+# Nevertheless, such auto-de-compression is the desired behaviour,
+# so we do it even though it's not strictly correct.
+compressed=--compressed
 
 token=$(keystone token-get | egrep '^\|[ ]*id' | sed -r -e 's/^\|[ ]*id[ ]*\|[ ]*//g' | sed -r -e 's/[ ]*\|$//g')
 ret=$?
@@ -41,7 +53,7 @@ test_url_method() {
 	url="$1"
 	method="$2"
 	echo "${method} $url"
-	curl $verbose -X "$method" -H "$auth" "$url"
+	curl $verbose $compressed -X "$method" -H "$auth" "$url"
 	ret=$?
 	echo
 	if [ $ret -ne 0 ] ; then
