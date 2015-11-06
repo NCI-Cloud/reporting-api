@@ -62,7 +62,7 @@ class SwaggerSpecification(object):
 
     @classmethod
     def _path_matches(cls, pattern, url):
-        logging.debug("Testing URL '%s' against pattern '%s'" % (url, pattern))
+        logging.debug("Testing URL '%s' against pattern '%s'", url, pattern)
         path_parameters = dict()
         pattern_components = pattern.split('/')
         url_components = url.split('/')
@@ -91,7 +91,7 @@ class SwaggerSpecification(object):
             if comp:
                 # Trailing unmatched non-empty URL component
                 return [False, []]
-        logging.debug("Match: '%s' '%s'" % (url, pattern))
+        logging.debug("Match: '%s' '%s'", url, pattern)
         return [True, path_parameters]
 
     def _base_path(self):
@@ -105,7 +105,7 @@ class SwaggerSpecification(object):
     def find_path(self, url):
         base_path = self._base_path()
         for path, pathdef in self._paths():
-            logging.debug("BasePath: '%s'" % base_path)
+            logging.debug("BasePath: '%s'", base_path)
             [matched, parameters] = self._path_matches(base_path + path, url)
             if matched:
                 return [pathdef, parameters]
