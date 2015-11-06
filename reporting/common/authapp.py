@@ -1,4 +1,5 @@
 import ConfigParser
+import abc
 from reporting.common.application import Application
 from keystonemiddleware.auth_token import filter_factory as auth_filter_factory
 
@@ -8,6 +9,8 @@ class KeystoneApplication(Application):
     """
     An Application which uses Keystone for authorisation using RBAC
     """
+
+    __metaclass__ = abc.ABCMeta
 
     INI_SECTION = 'keystone_authtoken'
 

@@ -1,8 +1,11 @@
+import abc
 from abc import abstractmethod
 from reporting.common.authapp import KeystoneApplication
 
 
 class APIVersion(KeystoneApplication):
+
+    __metaclass__ = abc.ABCMeta
 
     version_classes = []
 

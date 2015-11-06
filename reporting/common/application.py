@@ -1,4 +1,5 @@
 from webob import Request, Response
+import abc
 import webob.dec
 import webob.exc
 from urlparse import parse_qs
@@ -13,6 +14,8 @@ class Application(object):
     Abstract base class for a WSGI application configured by an INI file
     which responds to requests according to a Swagger API specification.
     """
+
+    __metaclass__ = abc.ABCMeta
 
     AUTH_FAILURE_MESSAGE = "Keystone authorisation failed"
 
