@@ -35,7 +35,6 @@ class DBConnection(object):
             Probably just a stale connection.
             If something worse has gone wrong, we will see it soon anyway.
             """
-            pass
 
     def execute(self, query, return_dictionaries=True, bind_values=None):
         """

@@ -25,6 +25,10 @@ class APIv1App(APIVersion):
         self.dbpass = self.config.get('database', 'password')
 
     def _connect_db(self):
+        """
+        Return a new connection to the database.
+        TODO: Connection pooling.
+        """
         return DBConnection(
             host=self.dbhost,
             user=self.dbuser,
@@ -64,7 +68,7 @@ class APIv1App(APIVersion):
                 name=report_name,
                 description=DBQueries.get_table_comment(
                     dbconn, self.dbname, report_name
-                ),function
+                ),
                 lastUpdated=DBQueries.get_table_lastupdate(
                     dbconn, report_name
                 ),
@@ -117,6 +121,9 @@ APIVersion.version_classes.append(APIv1App)
 
 
 def app_factory(global_config, **local_config):
+    """
+    Factory function that returns APIv1 WSGI applications.
+    """
     global_config.update(local_config)
     config_file_name = global_config.get('config_file')
     if not config_file_name:
