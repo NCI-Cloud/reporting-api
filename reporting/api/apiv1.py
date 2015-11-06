@@ -32,14 +32,14 @@ class APIv1App(APIVersion):
     def _get_links(cls):
         # TODO: Obtain this from the Swagger specification(s)
         return dict(
-            reports = '/v1/reports'
+            reports='/v1/reports'
         )
 
     @classmethod
     def _get_report_links(cls, report):
         # TODO: Obtain this from the Swagger specification(s)
         return dict(
-            self = '/v1/reports/' + report
+            self='/v1/reports/' + report
         )
 
     def _get_report_details(self, dbconn, report_name):
@@ -79,7 +79,7 @@ class APIv1App(APIVersion):
         # Handle conditional requests
         if not args:
             if req.if_modified_since and req.if_modified_since >= server_modified:
-                return ( webob.exc.HTTPNotModified(), headers )
+                return (webob.exc.HTTPNotModified(), headers)
         try:
             result_set = DBQueries.filter_table(dbconn, table_name, args)
         except:

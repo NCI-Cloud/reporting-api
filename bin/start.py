@@ -5,7 +5,7 @@ from paste.deploy import loadapp, loadserver
 import logging
 
 if __name__ == '__main__':
-    logging.basicConfig(filename = '/var/log/reporting-api.log', level = logging.INFO)
+    logging.basicConfig(filename='/var/log/reporting-api.log', level=logging.INFO)
     realfile = os.path.realpath(__file__)
     realdir = os.path.dirname(realfile)
     pardir = os.path.realpath(os.path.join(realdir, os.pardir))
