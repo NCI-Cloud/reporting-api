@@ -227,10 +227,10 @@ TEST_DATA = (
     ['first_value', 'second_value', TEST_DATETIME, dict(subkey='sub_entry')],
     ('first_value', 'second_value', TEST_DATETIME, dict(subkey='sub_entry')),
     dict(
-         firstkey='first_entry',
-         secondkey='second_entry',
-         happy_new_year=TEST_DATETIME,
-         subarray=['element1', 'element2']
+        firstkey='first_entry',
+        secondkey='second_entry',
+        happy_new_year=TEST_DATETIME,
+        subarray=['element1', 'element2']
     ),
 )
 

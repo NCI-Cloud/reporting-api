@@ -65,15 +65,15 @@ class APIv1App(APIVersion):
         Return details about the given-named report.
         """
         return dict(
-                name=report_name,
-                description=DBQueries.get_table_comment(
-                    dbconn, self.dbname, report_name
-                ),
-                lastUpdated=DBQueries.get_table_lastupdate(
-                    dbconn, report_name
-                ),
-                links=self._get_report_links(report_name)
-            )
+            name=report_name,
+            description=DBQueries.get_table_comment(
+                dbconn, self.dbname, report_name
+            ),
+            lastUpdated=DBQueries.get_table_lastupdate(
+                dbconn, report_name
+            ),
+            links=self._get_report_links(report_name)
+        )
 
     def operation_reports_list(self, req, args):
         """
