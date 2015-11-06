@@ -98,14 +98,14 @@ def factory(config, **settings):
     return filter
 
 if __name__ == '__main__':
-    realfile = os.path.realpath(__file__)
-    realdir = os.path.dirname(realfile)
-    pardir = os.path.realpath(os.path.join(realdir, os.pardir))
-    confdir = os.path.join(pardir, 'conf')
-    specfiles = ['swagger_versions.json', 'swagger_apiv1.json']
-    specs = [
-        json.loads(open(os.path.join(confdir, specfile)).read())
-        for specfile in specfiles
+    REALFILE = os.path.realpath(__file__)
+    REALDIR = os.path.dirname(REALFILE)
+    PARDIR = os.path.realpath(os.path.join(REALDIR, os.pardir))
+    CONFDIR = os.path.join(PARDIR, 'conf')
+    SPECFILES = ['swagger_versions.json', 'swagger_apiv1.json']
+    SPECS = [
+        json.loads(open(os.path.join(CONFDIR, specfile)).read())
+        for specfile in SPECFILES
     ]
-    mapper = SwaggerMapper(specs)
-    print mapper
+    MAPPER = SwaggerMapper(SPECS)
+    print MAPPER

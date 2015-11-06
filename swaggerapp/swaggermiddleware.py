@@ -69,6 +69,6 @@ def factory(config, **settings):
     return filter
 
 if __name__ == '__main__':
-    app = HelloApp()
-    middleware = SwaggerMiddleware(app)
-    print middleware
+    APP = HelloApp()
+    MIDDLEWARE = SwaggerMiddleware(APP)
+    print MIDDLEWARE

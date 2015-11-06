@@ -122,10 +122,10 @@ class SwaggerSpecification(object):
         return None
 
 if __name__ == '__main__':
-    swagger_files = 'conf/swagger_versions.json conf/swagger_apiv1.json'
-    specs = [
+    SWAGGER_FILES = 'conf/swagger_versions.json conf/swagger_apiv1.json'
+    SPECS = [
         SwaggerSpecification(
             json.loads(open(filename).read())
-        ) for filename in swagger_files.split()
+        ) for filename in SWAGGER_FILES.split()
     ]
-    print specs
+    print SPECS
