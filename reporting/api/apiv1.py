@@ -78,7 +78,10 @@ class APIv1App(APIVersion):
         )]
         # Handle conditional requests
         if not args:
-            if req.if_modified_since and req.if_modified_since >= server_modified:
+            if (
+                req.if_modified_since and
+                req.if_modified_since >= server_modified
+            ):
                 return (webob.exc.HTTPNotModified(), headers)
         try:
             result_set = DBQueries.filter_table(dbconn, table_name, args)

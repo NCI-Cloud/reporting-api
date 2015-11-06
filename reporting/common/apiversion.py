@@ -8,7 +8,8 @@ class APIVersion(KeystoneApplication):
 
     @classmethod
     @abstractmethod
-    def _version_identifier(cls): pass
+    def _version_identifier(cls):
+        pass
 
     @classmethod
     def _get_links(cls):

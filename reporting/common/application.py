@@ -203,7 +203,9 @@ class Application(object):
             # If Swagger path matched, but no operation matched the HTTP
             # method, HTTP Method Not Allowed
             if operation is None:
-                logging.warning("No matching operation in path in API specification")
+                logging.warning(
+                    "No matching operation in path in API specification"
+                )
                 logging.debug(path)
                 # Include an Allow header listing acceptable request methods
                 headers = []
