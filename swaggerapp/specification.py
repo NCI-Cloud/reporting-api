@@ -136,14 +136,12 @@ class SwaggerSpecification(object):
         base_path = self._base_path()
         for path, pathdef in self._paths():
             logging.debug("BasePath: '%s'", base_path)
-            [matched, parameters] = self._path_matches(base_path + path, url)
+            (matched, parameters) = self._path_matches(base_path + path, url)
             if matched:
-                return [pathdef, parameters]
-            """
+                return (pathdef, parameters)
             else:
-                logging.debug("Rejected URL '%s'" % url)
-            """
-        return [None, None]
+                logging.debug("Rejected URL '%s'", url)
+        return (None, None)
 
     @classmethod
     def find_operation(cls, pathdef, request_method):
