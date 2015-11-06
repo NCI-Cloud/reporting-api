@@ -17,7 +17,7 @@ class VersionsApp(Application):
     def __init__(self):
         super(VersionsApp, self).__init__(None)
 
-    def operation_APIVersionList(self, req, params):
+    def operation_api_version_list(self, req, params):
         """
         Return a list of available API versions.
         """
@@ -29,7 +29,7 @@ class VersionsApp(Application):
             None
         )
 
-    def operation_APIVersionDetails(self, req, params):
+    def operation_api_version_details(self, req, params):
         """
         Return details of one API version.
         FIXME: This calls an abstract base class method.

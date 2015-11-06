@@ -87,7 +87,7 @@
             "get": {
                 "summary": "Lists reports",
                 "description": "Retrieve a list of available reports",
-                "operationId": "ReportsList",
+                "operationId": "reports_list",
                 "responses": {
                     "200": {
                         "description": "A collection of available reports",
@@ -105,7 +105,7 @@
             "get": {
                 "summary": "Result set",
                 "description": "Retrieve a result set by searching the given report",
-                "operationId": "ReportResultSet",
+                "operationId": "report_result_set",
                 "parameters": [
                     {
                         "$ref": "#/parameters/report"

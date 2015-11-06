@@ -75,7 +75,7 @@ class APIv1App(APIVersion):
                 links=self._get_report_links(report_name)
             )
 
-    def operation_ReportsList(self, req, args):
+    def operation_reports_list(self, req, args):
         """
         List available reports.
         """
@@ -91,7 +91,7 @@ class APIv1App(APIVersion):
             for report_name in report_names
         ], None)
 
-    def operation_ReportResultSet(self, req, args):
+    def operation_report_result_set(self, req, args):
         """
         Run a report, generating a result set.
         """

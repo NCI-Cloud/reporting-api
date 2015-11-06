@@ -55,7 +55,7 @@ class APIVersion(KeystoneApplication):
         )
 
     @classmethod
-    def operation_APIVersionDetails(cls, req, params):
+    def operation_api_version_details(cls, req, params):
         """
         Return details of this API version.
         """

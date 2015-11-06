@@ -56,7 +56,7 @@
             "get": {
                 "summary": "API versions",
                 "description": "Retrieve a list of available versions of the Reporting API",
-                "operationId": "APIVersionList",
+                "operationId": "api_version_list",
                 "responses": {
                     "300": {
                         "description": "A collection of API versions",
@@ -83,7 +83,7 @@
             "get": {
                 "summary": "API version detail",
                 "description": "Retrieve detailed information about a version of the API",
-                "operationId": "APIVersionDetails",
+                "operationId": "api_version_details",
                 "responses": {
                     "200": {
                         "description": "Detailed information about the given API version",
