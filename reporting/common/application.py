@@ -195,12 +195,13 @@ class Application(object):
             logging.debug(swagger)
             path = swagger['path']
             operation = swagger['operation']
-            """If no Swagger path matched, 404 Not Found"""
+            # If no Swagger path matched, 404 Not Found
             if path is None:
                 logging.warning("No path matched requested URL")
                 # TODO: Include a link to the schema
                 return webob.exc.HTTPNotFound()
-            """If Swagger path matched, but no operation matched the HTTP method, HTTP Method Not Allowed"""
+            # If Swagger path matched, but no operation matched the HTTP
+            # method, HTTP Method Not Allowed
             if operation is None:
                 logging.warning("No matching operation in path in API specification")
                 logging.debug(path)
