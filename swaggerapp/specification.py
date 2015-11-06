@@ -81,18 +81,18 @@ class SwaggerSpecification(object):
                 path_parameters[patt_comp[1:-1]] = url_comp
             elif patt_comp != url_comp:
                 # Literal component mismatch
-                return [False, []]
+                return (False, path_parameters)
         i += 1
         for comp in pattern_components[i:patt_len]:
             if comp:
                 # Trailing unmatched non-empty path pattern component
-                return [False, []]
+                return (False, path_parameters)
         for comp in url_components[i:url_len]:
             if comp:
                 # Trailing unmatched non-empty URL component
-                return [False, []]
+                return (False, path_parameters)
         logging.debug("Match: '%s' '%s'", url, pattern)
-        return [True, path_parameters]
+        return (True, path_parameters)
 
     def _base_path(self):
         if 'basePath' in self.spec:
