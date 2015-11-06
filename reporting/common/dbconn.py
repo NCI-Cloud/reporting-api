@@ -50,7 +50,7 @@ class DBConnection(object):
         cursor.execute(query, bind_values)
         return cursor
 
-    def callproc(self, procname, return_dictionaries=True, args=[]):
+    def callproc(self, procname, return_dictionaries=True, args=()):
         """
         Execute the given-named stored procedure with the given arguments.
         If return_dictionaries is true, each row is a dictionary;
