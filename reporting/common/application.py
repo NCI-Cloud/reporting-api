@@ -24,6 +24,10 @@ class Application(object):
         self.config = configuration
 
     def _get_method(self, func_name):
+        """
+        Find and return the method with the given name on this object,
+        or return None if no such method exists.
+        """
         return getattr(self, func_name, None)
 
     @classmethod

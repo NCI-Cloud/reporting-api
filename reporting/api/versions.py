@@ -8,6 +8,9 @@ class VersionsApp(Application):
         super(VersionsApp, self).__init__(None)
 
     def operation_APIVersionList(self, req, params):
+        """
+        Return a list of available API versions.
+        """
         return (
             [
                 version.api_version_detail(req, params)

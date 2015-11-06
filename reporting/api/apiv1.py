@@ -1,3 +1,7 @@
+"""
+OpenStack Reporting API version 1.
+"""
+
 import ConfigParser
 import webob.exc
 from reporting.common.apiversion import APIVersion
@@ -8,6 +12,10 @@ from time import mktime
 
 
 class APIv1App(APIVersion):
+
+    """
+    Implements version 1 of the OpenStack Reporting API.
+    """
 
     def __init__(self, configuration):
         super(APIv1App, self).__init__(configuration)
@@ -43,6 +51,9 @@ class APIv1App(APIVersion):
         )
 
     def _get_report_details(self, dbconn, report_name):
+        """
+        Return details about the given-named report.
+        """
         return dict(
                 name=report_name,
                 description=DBQueries.get_table_comment(
@@ -55,6 +66,9 @@ class APIv1App(APIVersion):
             )
 
     def operation_ReportsList(self, req, args):
+        """
+        List available reports.
+        """
         dbconn = self._connect_db()
         report_name_iter = DBQueries.get_table_list(dbconn)
         # The current resultset must be entirely read before another query
@@ -68,6 +82,9 @@ class APIv1App(APIVersion):
         ], None)
 
     def operation_ReportResultSet(self, req, args):
+        """
+        Run a report, generating a result set.
+        """
         dbconn = self._connect_db()
         table_name = args['report']
         del args['report']
