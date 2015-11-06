@@ -93,6 +93,12 @@ def factory(config, **settings):
     return filter
 
 if __name__ == '__main__':
-    APP = HelloApp()
-    MIDDLEWARE = SwaggerMiddleware(APP)
+    from reporting.api.versions import VersionsApp
+    APP = VersionsApp()
+    SPEC = SwaggerSpecification(
+        json.loads(
+            open('reporting/conf/swagger_versions.json').read()
+        )
+    )
+    MIDDLEWARE = SwaggerMiddleware(APP, (SPEC))
     print MIDDLEWARE
