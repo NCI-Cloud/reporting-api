@@ -112,6 +112,11 @@ class APIv1App(APIVersion):
                 return (webob.exc.HTTPNotModified(), headers)
         try:
             result_set = DBQueries.filter_table(dbconn, table_name, args)
+            # Pylint warns about catch-all exception handlers like that below.
+            # The rationale is that this "prohibits the use of tailored
+            # responses" - but that is exactly what we are attempting to do.
+            # So just disable the warning.
+            # pylint: disable=W0702
         except:
             # Don't leak information about the database
             return (webob.exc.HTTPBadRequest(), [])
