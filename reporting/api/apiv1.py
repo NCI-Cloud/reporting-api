@@ -10,7 +10,7 @@ from time import mktime
 class APIv1App(APIVersion):
 
     def __init__(self, configuration):
-        super(APIVersion, self).__init__(configuration)
+        super(APIv1App, self).__init__(configuration)
         self.dbname = self.config.get('database', 'dbname')
         self.dbhost = self.config.get('database', 'hostname')
         self.dbuser = self.config.get('database', 'username')
