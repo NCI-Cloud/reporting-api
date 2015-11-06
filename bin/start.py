@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-import sys, os
+import sys
+import os
 from paste.deploy import loadapp, loadserver
 import logging
 

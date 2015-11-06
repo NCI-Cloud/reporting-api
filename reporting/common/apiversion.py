@@ -1,6 +1,5 @@
 from abc import abstractmethod
-import abc
-from authapp import KeystoneApplication
+from reporting.common.authapp import KeystoneApplication
 
 
 class APIVersion(KeystoneApplication):

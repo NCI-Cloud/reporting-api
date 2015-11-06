@@ -1,5 +1,4 @@
 from webob import Request, Response
-import abc
 import webob.dec
 import webob.exc
 from urlparse import parse_qs
