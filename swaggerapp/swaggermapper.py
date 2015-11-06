@@ -14,7 +14,7 @@ class SwaggerMapper(Mapper):
     """
 
     def __init__(self, swagger_specs):
-        super(SwaggerMapper, self).__init__();
+        super(SwaggerMapper, self).__init__()
         """
         To debug this Mapper:
         logging.basicConfig()
@@ -73,19 +73,19 @@ class SwaggerMapper(Mapper):
                     conditions=dict(method='OPTIONS')
                 )
             """
-        self.redirect('', '/');
+        self.redirect('', '/')
 
     def routematch(self, url=None, environ=None):
         """Work around a crash in routes.mapper if url is empty"""
         if url is '':
-            result = self._match('', environ);
+            result = self._match('', environ)
             return result[0], result[1]
         return super(SwaggerMapper, self).routematch(url, environ)
 
 
 def factory(config, **settings):
     def filter(app):
-        config.update(settings);
+        config.update(settings)
         swagger_files = config.get('swagger_json')
         if not swagger_files:
             raise ValueError('No swagger_json specified')
