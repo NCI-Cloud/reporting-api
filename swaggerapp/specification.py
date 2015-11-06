@@ -1,5 +1,9 @@
 #!/usr/bin/python
 
+"""
+Represents a parsed Swagger API specification.
+"""
+
 import json
 import logging
 
@@ -7,7 +11,7 @@ import logging
 class SwaggerSpecification(object):
 
     """
-    Represents a parsed Swagger API specification
+    Represents a parsed Swagger API specification.
     """
 
     # The Swagger specification v2.0 mandates use of only these methods
@@ -19,6 +23,15 @@ class SwaggerSpecification(object):
 
     @classmethod
     def _validate_spec(cls, spec):
+        """
+        Validate this Swagger specification.
+        Each operation must have an operationId,
+        since we use that to determine the Python method to call.
+        In past versions of Swagger, this attribute was required,
+        but in the version current at time of writing, it has been made
+        optional.
+        Additionally, each operation must define a single response.
+        """
         if 'paths' in spec:
             paths = spec['paths']
             for (pathpatt, pathdef) in paths.items():
@@ -40,6 +53,11 @@ class SwaggerSpecification(object):
                             )
 
     def _resolve_ref(self, ref):
+        """
+        Given a JSON reference, resolve it within the spec.
+        This must recurse, as the referent of a JSON reference
+        may itself be a JSON reference.
+        """
         spec = self.spec
         if not ref.startswith('#/'):
             raise ValueError("Cannot handle catalog ref '%s'" % ref)
@@ -55,7 +73,8 @@ class SwaggerSpecification(object):
 
     def resolve_refs(self, schema):
         """
-        Given a JSON reference, resolve it within the spec.
+        Given a schema or a JSON reference to a schema, resolve it within
+        the specification, yielding the schema referent.
         This must recurse, as the referent of a JSON reference
         may itself be a JSON reference.
         """

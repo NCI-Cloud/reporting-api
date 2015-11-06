@@ -1,11 +1,15 @@
+"""
+Represents a connection to an RDBMS.
+"""
+
 import mysql.connector
 from mysql.connector import InterfaceError
 
 
 class DBConnection(object):
-    '''
+    """
     Represents a connection to an RDBMS.
-    '''
+    """
 
     def __init__(self, **kwargs):
         """
@@ -64,6 +68,11 @@ class DBConnection(object):
         return cursor
 
 
+# Pylint warns that the following class has too few public methods.
+# The class has the sole public method that it is intended to have,
+# so the following comment disables the warning.
+# pylint: disable=R0903
+
 class CursorIter(object):
 
     """
@@ -74,6 +83,11 @@ class CursorIter(object):
         self.cursor = cursor
 
     def next(self):
+        """
+        Return the next row yielded by this cursor.
+        Raise StopIteration if the cursor is exhausted,
+        ie all of its rows have already been read.
+        """
         row = self.cursor.fetchone()
         if row is None:
             raise StopIteration()
@@ -92,9 +106,22 @@ class CursorSliceIter(CursorIter):
         self.index = index
 
     def next(self):
+        """
+        Return one column of the next row yielded by this cursor.
+        Raise StopIteration if the cursor is exhausted,
+        ie all of its rows have already been read.
+        """
         row = super(CursorSliceIter, self).next()
         return row[self.index]
 
+
+# Pylint warns that the following class has too few public methods.
+# It is not intended to have many (or even any) public methods,
+# so this is not a problem, so the following comment silences the warning.
+# Apparently, pylint assumes (falsely) that a class without public methods
+# is being abused as a mere holder of data - but the below class is being
+# used as a holder of code, as is common accepted practice in OOP.
+# pylint: disable=R0903
 
 class ResultSet(object):
 
@@ -108,6 +135,14 @@ class ResultSet(object):
     def __iter__(self):
         return CursorIter(self.cursor)
 
+
+# Pylint warns that the following classes have too few public methods.
+# They are not intended to have many (or even any) public methods,
+# so this is not a problem, so the following comment silences the warning.
+# Apparently, pylint assumes (falsely) that a class without public methods
+# is being abused as a mere holder of data - but the below classes are being
+# used as holders of code, as is common accepted practice in OOP.
+# pylint: disable=R0903
 
 class ResultSetSlice(ResultSet):
 

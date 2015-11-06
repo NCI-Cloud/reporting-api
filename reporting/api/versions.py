@@ -1,8 +1,18 @@
+"""
+A WSGI application which lists available versions
+of APIs understood by another WSGI application.
+"""
+
 from reporting.common.apiversion import APIVersion
 from reporting.common.application import Application
 
 
 class VersionsApp(Application):
+
+    """
+    A WSGI application which lists available versions
+    of APIs understood by another WSGI application.
+    """
 
     def __init__(self):
         super(VersionsApp, self).__init__(None)
@@ -28,4 +38,7 @@ class VersionsApp(Application):
 
 
 def app_factory(global_config, **settings):
+    """
+    A factory function which returns WSGI version-list applications.
+    """
     return VersionsApp()

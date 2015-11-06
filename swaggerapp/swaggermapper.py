@@ -89,9 +89,12 @@ class SwaggerMapper(Mapper):
 
 def factory(config, **settings):
     """
-    WSGI filter factory function.
+    Function that returns a WSGI filter factory function.
     """
     def filter(app):
+        """
+        WSGI filter factory function.
+        """
         config.update(settings)
         swagger_files = config.get('swagger_json')
         if not swagger_files:

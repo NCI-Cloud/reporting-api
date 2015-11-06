@@ -45,7 +45,13 @@ class APIv1App(APIVersion):
 
     @classmethod
     def _get_report_links(cls, report):
-        # TODO: Obtain this from the Swagger specification(s)
+        """
+        Return a set of links to other resources linked to this resource.
+        The keys are the relationship of the other resource to this resource;
+        the entries are the URLs of the other resources.
+        This is intended to implement HATEOAS.
+        TODO: Obtain this from the Swagger specification(s).
+        """
         return dict(
             self='/v1/reports/' + report
         )
@@ -58,7 +64,7 @@ class APIv1App(APIVersion):
                 name=report_name,
                 description=DBQueries.get_table_comment(
                     dbconn, self.dbname, report_name
-                ),
+                ),function
                 lastUpdated=DBQueries.get_table_lastupdate(
                     dbconn, report_name
                 ),

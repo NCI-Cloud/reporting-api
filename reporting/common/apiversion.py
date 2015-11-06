@@ -1,9 +1,24 @@
+"""
+Abstract base class representing a particular version of an API spoken
+by a WSGI application.
+"""
+
 import abc
 from abc import abstractmethod
 from reporting.common.authapp import KeystoneApplication
 
 
+# This abstract base class is used by classes in other files,
+# but pylint does not understand that because it processes files
+# one at a time. The following comment silences a warning from pylint.
+# pylint: disable=R0921
+
 class APIVersion(KeystoneApplication):
+
+    """
+    Abstract base class representing a particular version of an API spoken
+    by a WSGI application.
+    """
 
     __metaclass__ = abc.ABCMeta
 

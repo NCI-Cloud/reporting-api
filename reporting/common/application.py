@@ -1,3 +1,8 @@
+"""
+A WSGI application configured by an INI file,
+which responds to requests according to a Swagger API specification.
+"""
+
 from webob import Request, Response
 import abc
 import webob.dec
@@ -7,6 +12,14 @@ from swaggerapp.specification import SwaggerSpecification
 from swaggerapp.encoder import JSONStreamingEncoder
 import logging
 
+
+# Pylint warns that the following class has too few public methods.
+# It is not intended to have many (or even any) public methods,
+# so this is not a problem, so the following comment silences the warning.
+# Apparently, pylint assumes (falsely) that a class without public methods
+# is being abused as a mere holder of data - but the below class is being
+# used as a holder of code, as is common accepted practice in OOP.
+# pylint: disable=R0903
 
 class Application(object):
 
@@ -32,6 +45,14 @@ class Application(object):
 
     @classmethod
     def _expected_response(cls, operation):
+        """
+        Given a Swagger operation, return the sole response.
+        If the specification allows no responses, we cannot succeed,
+        because HTTP requires a response to every request.
+        If the specification allows multiple responses,
+        we have no way to choose which will be returned,
+        so we must also fail.
+        """
         if 'responses' not in operation:
             raise ValueError('No responses')
         responses = operation['responses']
@@ -41,6 +62,11 @@ class Application(object):
 
     @classmethod
     def _expected_status(cls, req, operation):
+        """
+        Given a Swagger operation, return the expected status.
+        This is the HTTP status that will be served in response
+        to a request mapping to this operation.
+        """
         if "options" == req.environ['REQUEST_METHOD'].lower():
             return '200 OK'
         resp = cls._expected_response(operation)
@@ -48,10 +74,20 @@ class Application(object):
 
     @classmethod
     def _expected_body(cls, operation):
+        """
+        Given a Swagger operation, return the expected body.
+        This is the HTTP response body that will be served
+        in response to a request mapping to this operation.
+        """
         return cls._expected_response(operation).values()[0]
 
     @classmethod
     def _expected_schema(cls, operation):
+        """
+        Given a Swagger operation, return the schema of the expected body.
+        This specifies the structure of the HTTP response body that will
+        be served in response to a request mapping to this operation.
+        """
         body = cls._expected_body(operation)
         if 'schema' not in body:
             raise ValueError('No schema in response')

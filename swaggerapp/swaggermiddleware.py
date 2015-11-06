@@ -1,10 +1,19 @@
 #!/usr/bin/python
 
+"""
+Map URLs to Swagger operations and therefore to Python methods.
+"""
+
 import json
 import logging
 
 from swaggerapp.specification import SwaggerSpecification
 
+
+# Pylint warns that the following class has too few public methods,
+# even though __call__ is effectively a public method.
+# The following comment disabled the seemingly-incorrect warning.
+# pylint: disable=R0903
 
 class SwaggerMiddleware(object):
 
@@ -63,7 +72,14 @@ class SwaggerMiddleware(object):
 
 
 def factory(config, **settings):
+    """
+    Function that returns a function that returns
+    WSGI filters.
+    """
     def filter(app):
+        """
+        Factory method that produces WSGI filters.
+        """
         config.update(settings)
         swagger_files = config.get('swagger_json')
         if not swagger_files:

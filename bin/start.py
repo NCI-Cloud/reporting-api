@@ -1,5 +1,9 @@
 #!/usr/bin/python
 
+"""
+Start the Reporting API application using Paste Deploy.
+"""
+
 import sys
 import os
 from paste.deploy import loadapp, loadserver

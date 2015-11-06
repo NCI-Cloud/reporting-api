@@ -1,3 +1,8 @@
+"""
+Encapsulates a set of pre-defined database queries,
+gathering all SQL into one place.
+"""
+
 from datetime import datetime, tzinfo, timedelta
 from MySQLdb import escape_string
 from reporting.common.dbconn import ResultSet, ResultSetSlice
