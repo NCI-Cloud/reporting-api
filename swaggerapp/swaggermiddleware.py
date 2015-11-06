@@ -18,6 +18,14 @@ class SwaggerMiddleware(object):
         self.application = application
 
     def _decorate_environment(self, environ):
+        """
+        Given the request environment, using the loaded specification,
+        decorate the request environment with additional information
+        about the request found by examining the specification.
+
+        If the request matches an operation defined in the specification,
+        this information includes that operation and its parameters.
+        """
         url = environ['SCRIPT_NAME'] + environ['PATH_INFO']
         if 'swagger' in environ:
             swagger = environ['swagger']

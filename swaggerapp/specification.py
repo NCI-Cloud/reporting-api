@@ -54,6 +54,11 @@ class SwaggerSpecification(object):
         return spec
 
     def resolve_refs(self, schema):
+        """
+        Given a JSON reference, resolve it within the spec.
+        This must recurse, as the referent of a JSON reference
+        may itself be a JSON reference.
+        """
         while '$ref' in schema:
             schema = self._resolve_ref(schema['$ref'])
         if 'type' in schema:
@@ -62,6 +67,21 @@ class SwaggerSpecification(object):
 
     @classmethod
     def _path_matches(cls, pattern, url):
+        """
+        Compare the given URL against the given URL pattern.
+        Return a two-element tuple, where in the first element
+        if True if the URL matches the pattern, or false otherwise,
+        and the second element is a dict of components of the URL
+        which matched a component of the pattern which was a pattern
+        component rather than a literal.
+
+        For example, given a URL:
+        /foo/bar/baz/frort/quux/snazzle
+        and a URL pattern:
+        /foo/{a}/baz/{bop}/quux/{munge}
+        the return value would be:
+        (True, dict(a='bar', bop='frort', munge='snazzle'))
+        """
         logging.debug("Testing URL '%s' against pattern '%s'", url, pattern)
         path_parameters = dict()
         pattern_components = pattern.split('/')
@@ -95,14 +115,24 @@ class SwaggerSpecification(object):
         return (True, path_parameters)
 
     def _base_path(self):
+        """
+        Return the base path (if any) defined in this specification.
+        """
         if 'basePath' in self.spec:
             return self.spec['basePath']
         return ''
 
     def _paths(self):
+        """
+        Return a list of the paths defined in this specification.
+        """
         return self.spec['paths'].items()
 
     def find_path(self, url):
+        """
+        Find a path in this specification which matches the given URL.
+        Return that path if it exists, or a tuple of Nones if it does not.
+        """
         base_path = self._base_path()
         for path, pathdef in self._paths():
             logging.debug("BasePath: '%s'", base_path)
@@ -117,6 +147,10 @@ class SwaggerSpecification(object):
 
     @classmethod
     def find_operation(cls, pathdef, request_method):
+        """
+        Given a path definition and a request method, return the matching
+        operation, or None if no operation matches.
+        """
         request_method = request_method.lower()
         if request_method in pathdef:
             return pathdef[request_method]

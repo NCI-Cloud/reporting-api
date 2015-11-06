@@ -17,6 +17,10 @@ class VersionsApp(Application):
         )
 
     def operation_APIVersionDetails(self, req, params):
+        """
+        Return details of one API version.
+        FIXME: This calls an abstract base class method.
+        """
         return (APIVersion.api_version_detail(req, params), None)
 
 
