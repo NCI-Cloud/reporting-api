@@ -68,6 +68,7 @@ class SwaggerSpecification(object):
         url_components = url.split('/')
         patt_len = len(pattern_components)
         url_len = len(url_components)
+        i = 0
         for i in range(0, min(patt_len, url_len)):
             patt_comp = pattern_components[i]
             url_comp = url_components[i]
