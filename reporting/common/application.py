@@ -3,8 +3,8 @@ import abc
 import webob.dec
 import webob.exc
 from urlparse import parse_qs
-from common.specification import SwaggerSpecification
-from common.encoder import JSONStreamingEncoder
+from swaggerapp.specification import SwaggerSpecification
+from swaggerapp.encoder import JSONStreamingEncoder
 import logging
 
 class Application(object):

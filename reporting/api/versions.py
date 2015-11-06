@@ -1,5 +1,5 @@
-from common.apiversion import APIVersion
-from common.application import Application
+from reporting.common.apiversion import APIVersion
+from reporting.common.application import Application
 
 class VersionsApp(Application):
 

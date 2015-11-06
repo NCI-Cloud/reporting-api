@@ -1,5 +1,5 @@
 import ConfigParser
-from common.application import Application
+from reporting.common.application import Application
 from keystonemiddleware.auth_token import filter_factory as auth_filter_factory
 
 class KeystoneApplication(Application):

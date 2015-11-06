@@ -1,6 +1,6 @@
 from datetime import datetime, tzinfo, timedelta
 from MySQLdb import escape_string
-from common.dbconn import ResultSet, ResultSetSlice
+from reporting.common.dbconn import ResultSet, ResultSetSlice
 
 class UTC(tzinfo):
 

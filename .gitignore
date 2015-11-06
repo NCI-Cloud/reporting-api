@@ -1,4 +1,4 @@
 *.pyc
-conf/apiv1.ini
+reporting/conf/apiv1.ini
 .project
 .pydevproject

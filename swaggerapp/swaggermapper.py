@@ -4,7 +4,7 @@ import json
 import os
 from routes.middleware import RoutesMiddleware
 from routes import Mapper
-from common.specification import SwaggerSpecification
+from swaggerapp.specification import SwaggerSpecification
 
 class SwaggerMapper(Mapper):
 	"""

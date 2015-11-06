@@ -3,7 +3,7 @@
 import json
 import logging
 
-from common.specification import SwaggerSpecification
+from swaggerapp.specification import SwaggerSpecification
 
 class SwaggerMiddleware(object):
 

@@ -1,8 +1,8 @@
 import ConfigParser
 import webob.exc
-from common.apiversion import APIVersion
-from common.dbconn import DBConnection
-from app.dbqueries import DBQueries
+from reporting.common.apiversion import APIVersion
+from reporting.common.dbconn import DBConnection
+from reporting.api.dbqueries import DBQueries
 from wsgiref.handlers import format_date_time
 from time import mktime
 

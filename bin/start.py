@@ -9,7 +9,7 @@ if __name__ == '__main__':
 	realfile = os.path.realpath(__file__)
 	realdir = os.path.dirname(realfile)
 	pardir = os.path.realpath(os.path.join(realdir, os.pardir))
-	confdir = os.path.join(pardir, 'conf')
+	confdir = os.path.join(pardir, 'reporting', 'conf')
 	paste_config = os.path.join(confdir, 'paste.config')
 	sys.path.insert(0, pardir)
 	reporting_app = loadapp('config:' + paste_config)

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Attempt to use the IP address in the Paste configuration file
-ip=$(cat conf/paste.config | egrep '^ *host *= *([^ ]+) *$' | sed -r -e 's/^ *host *= *([^ ]+) *$/\1/')
+ip=$(cat reporting/conf/paste.config | egrep '^ *host *= *([^ ]+) *$' | sed -r -e 's/^ *host *= *([^ ]+) *$/\1/')
 if test -z "$ip" ; then
 	# Fall back to the IPv4 address of the first found network interface
        ip=$(ip a|egrep 'inet[^6]'|fgrep -v 127.0.0.1|sed -r -e 's/.*inet ([0-9.]+).*/\1/g'|head -1)
