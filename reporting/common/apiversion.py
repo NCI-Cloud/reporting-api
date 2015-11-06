@@ -16,7 +16,7 @@ class APIVersion(KeystoneApplication):
         return dict()
 
     @classmethod
-    def _api_version_detail(cls, req):
+    def api_version_detail(cls, req):
         links = cls._get_links()
         links['self'] = "/" + cls._version_identifier()
         return dict(
@@ -26,4 +26,4 @@ class APIVersion(KeystoneApplication):
 
     @classmethod
     def operation_APIVersionDetails(cls, req, params):
-        return (cls._api_version_detail(req), None)
+        return (cls.api_version_detail(req), None)

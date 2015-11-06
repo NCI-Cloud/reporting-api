@@ -10,14 +10,14 @@ class VersionsApp(Application):
     def operation_APIVersionList(self, req, args):
         return (
             [
-                version._api_version_detail(req)
+                version.api_version_detail(req)
                 for version in APIVersion.version_classes
             ],
             None
         )
 
     def operation_APIVersionDetails(self, req, params):
-        return (APIVersion._api_version_detail(req), None)
+        return (APIVersion.api_version_detail(req), None)
 
 
 def app_factory(global_config, **settings):
