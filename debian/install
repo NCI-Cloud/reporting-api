@@ -1,3 +1,4 @@
+reporting-api.py /usr/sbin
 paste.config /etc/reporting-api
 apiv1.ini /etc/reporting-api
 reporting/conf/*.json /etc/reporting-api/swagger
