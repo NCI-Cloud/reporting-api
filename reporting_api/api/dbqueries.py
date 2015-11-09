@@ -5,7 +5,7 @@ gathering all SQL into one place.
 
 from datetime import datetime, tzinfo, timedelta
 from MySQLdb import escape_string
-from reporting.common.dbconn import ResultSet, ResultSetSlice
+from reporting_api.common.dbconn import ResultSet, ResultSetSlice
 
 
 class UTC(tzinfo):

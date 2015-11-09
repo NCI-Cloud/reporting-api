@@ -4,9 +4,9 @@ OpenStack Reporting API version 1.
 
 import ConfigParser
 import webob.exc
-from reporting.common.apiversion import APIVersion
-from reporting.common.dbconn import DBConnection
-from reporting.api.dbqueries import DBQueries
+from reporting_api.common.apiversion import APIVersion
+from reporting_api.common.dbconn import DBConnection
+from reporting_api.api.dbqueries import DBQueries
 from wsgiref.handlers import format_date_time
 from time import mktime
 

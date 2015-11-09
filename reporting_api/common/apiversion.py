@@ -5,7 +5,7 @@ by a WSGI application.
 
 import abc
 from abc import abstractmethod
-from reporting.common.authapp import KeystoneApplication
+from reporting_api.common.authapp import KeystoneApplication
 
 
 # This abstract base class is used by classes in other files,

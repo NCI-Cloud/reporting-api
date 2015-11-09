@@ -3,8 +3,8 @@ A WSGI application which lists available versions
 of APIs understood by another WSGI application.
 """
 
-from reporting.common.apiversion import APIVersion
-from reporting.common.application import Application
+from reporting_api.common.apiversion import APIVersion
+from reporting_api.common.application import Application
 
 
 class VersionsApp(Application):
