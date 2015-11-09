@@ -17,7 +17,6 @@ setup(
     license='Apache 2.0',
     author='NCI Cloud Team',
     author_email='cloud.team@nci.org.au',
-    py_modules=['app', 'bin', 'common', 'conf'],
     packages=find_packages(),
     install_requires=open('REQUIREMENTS.txt').read().splitlines(),
     include_package_data=True,
