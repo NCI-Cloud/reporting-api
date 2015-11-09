@@ -7,7 +7,7 @@ Standards-Version: 3.9.1
 
 Package: python-reporting-api
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}
+Depends: ${misc:Depends}, ${python:Depends}, python-keystonemiddleware (>= 1.0.0)
 Description: OpenStack Reporting API
  # reporting-api
  OpenStack Reporting API
