@@ -1,3 +1,3 @@
-paste.config /etc/reporting-api
-apiv1.ini /etc/reporting-api
+debian/paste.config /etc/reporting-api
+debian/apiv1.ini /etc/reporting-api
 reporting/conf/*.json /etc/reporting-api/swagger
