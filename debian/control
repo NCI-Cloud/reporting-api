@@ -2,12 +2,12 @@ Source: reporting-api
 Maintainer: NCI Cloud Team <cloud.team@nci.org.au>
 Section: python
 Priority: optional
-Build-Depends: python-setuptools (>= 0.6b3), python (>= 2.6.6-3), debhelper (>= 9), dh-python, python-keystonemiddleware (>= 1.0.0)
+Build-Depends: python-setuptools (>= 0.6b3), python (>= 2.6.6-3), debhelper (>= 9), dh-python, python-keystonemiddleware (>= 1.0.0), python-wsgicors (>= 0.4.1)
 Standards-Version: 3.9.1
 
 Package: python-reporting-api
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}, python-keystonemiddleware (>= 1.0.0)
+Depends: ${misc:Depends}, ${python:Depends}, python-keystonemiddleware (>= 1.0.0), python-wsgicors (>= 0.4.1)
 Description: OpenStack Reporting API
  # reporting-api
  OpenStack Reporting API
