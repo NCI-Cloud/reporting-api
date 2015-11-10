@@ -66,6 +66,15 @@ class DBConnection(object):
         cursor.callproc(procname, args)
         return cursor
 
+    def escape_identifier(self, identifier):
+        """
+        Escape the given identifier, so that it will not be misinterpreted if
+        it contains characters that are special in the dialect of SQL
+        being spoken on this database connection.
+        Such escaping is necessary when placeholders cannot be used.
+        """
+        return self.conn.converter.escape(identifier)
+
 
 # Pylint warns that the following class has too few public methods.
 # The class has the sole public method that it is intended to have,

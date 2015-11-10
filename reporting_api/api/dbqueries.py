@@ -4,7 +4,6 @@ gathering all SQL into one place.
 """
 
 from datetime import datetime, tzinfo, timedelta
-from MySQLdb import escape_string
 from reporting_api.common.dbconn import ResultSet, ResultSetSlice
 
 
@@ -80,9 +79,9 @@ class DBQueries(object):
         FIXME: Remove this knowledge about the underlying schema.
         """
         # In this query, table names are literals, so can be parameters
-        query = "SELECT " + escape_string(cls.METADATA_LAST_UPDATE_COLUMN) \
-            + " FROM " + escape_string(cls.METADATA_TABLE) \
-            + " WHERE " + escape_string(cls.METADATA_TABLE_NAME_COLUMN) \
+        query = "SELECT " + dbconn.escape_identifier(cls.METADATA_LAST_UPDATE_COLUMN) \
+            + " FROM " + dbconn.escape_identifier(cls.METADATA_TABLE) \
+            + " WHERE " + dbconn.escape_identifier(cls.METADATA_TABLE_NAME_COLUMN) \
             + " IN (" + ",".join(['%s'] * len(table_names)) + ");"
         cursor = dbconn.execute(query, False, table_names)
         return ResultSetSlice(cursor, 0)
@@ -120,14 +119,14 @@ class DBQueries(object):
         The filter_args are ANDed together then used as a WHERE criterion.
         """
         # Table names cannot be parameters, so must be escaped
-        query = 'SELECT * FROM ' + escape_string(table_name)
+        query = 'SELECT * FROM ' + dbconn.escape_identifier(table_name)
         parameters = []
         if filter_args:
             query += ' WHERE '
             criteria = []
             for (key, val) in filter_args.items():
                 # Column names cannot be parameters, so must escaped
-                criteria.append(escape_string(key) + "=%s")
+                criteria.append(dbconn.escape_identifier(key) + "=%s")
                 # Filter values can be parameters
                 parameters.append(val[0])
             query += ' AND '.join(criteria)
