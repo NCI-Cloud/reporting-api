@@ -32,6 +32,22 @@ class KeystoneApplication(Application):
         if self.required_role is None:
             raise ValueError("No required role supplied")
 
+    @classmethod
+    def _headers(cls):
+        """
+        Return a list of ('Header-Name', 'Header-Value') tuples,
+        which should be added as HTTP headers to every response.
+
+        Our responses depend on whether or not correct authentication was
+        performed, yielding  a token, and if it was, whether that token
+        authorises access to the given data.
+        The token is passed in via the X-Auth-Token header,
+        so our responses depend on it.
+        """
+        headers = super(KeystoneApplication, cls)._headers()
+        headers.append(('Vary', 'X-Auth-Token'))
+        return headers
+
     def _check_auth(self, req):
         if not self.required_role:
             return True

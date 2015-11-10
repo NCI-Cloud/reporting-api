@@ -92,6 +92,14 @@ class Application(object):
         return body['schema']
 
     @classmethod
+    def _headers(cls):
+        """
+        Return a list of ('Header-Name', 'Header-Value') tuples,
+        which should be added as HTTP headers to every response.
+        """
+        return []
+
+    @classmethod
     def _build_response(cls, req, return_value_iter, headers=None):
         """
         Build an HTTP response to the given request, with response body
@@ -119,11 +127,8 @@ class Application(object):
         TODO: XML response support, depending on content negotiation.
         """
         headers.append(('Content-Type', 'application/json'))
-        """
-        Our responses depend on whether or not correct authorisation was
-        supplied using a token.
-        """
-        headers.append(('Vary', 'X-Auth-Token'))
+        for tup in cls._headers():
+            headers.append(tup)
         if return_value_iter is None:
             return_value_iter = iter()
         if expected_type is None:
@@ -212,7 +217,7 @@ class Application(object):
         - For a request that doesn't map to an operationId in the schema,
           or maps to something not defined in Python, or maps to a private
           method whose name begins with an underscore, an HTTP error
-        - The result of calling self.<operationId>, which is expected to
+        - The result of calling self.operation_<operationId>, which is expected to
           return a ( body, headers ) tuple.
         """
         req = Request(req_dict.environ)
