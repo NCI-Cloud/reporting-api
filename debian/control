@@ -7,7 +7,7 @@ Standards-Version: 3.9.1
 
 Package: python-reporting-api
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}, python-keystonemiddleware (>= 1.0.0), python-wsgicors (>= 0.4.1)
+Depends: ${misc:Depends}, ${python:Depends}, python-keystonemiddleware (>= 1.0.0), python-wsgicors (>= 0.4.1), python-pastedeploy (>= 1.5.2)
 Description: OpenStack Reporting API
  # reporting-api
  OpenStack Reporting API
