@@ -23,7 +23,7 @@ def parse_args():
 
 
 def create_pidfile(pidfile="/var/run/reporting-api.pid"):
-    with open(pidfile, 'rw') as pf:
+    with open(pidfile, 'w') as pf:
         pf.write("%d" % (os.getpid()))
 
 if __name__ == '__main__':
