@@ -1,0 +1,1 @@
+DAEMON_ARGS="--confdir /etc/reporting-api --logfile /var/log/reporting-api.log"
