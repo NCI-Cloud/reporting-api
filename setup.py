@@ -20,7 +20,7 @@ setup(
     packages=find_packages(),
     install_requires=open('REQUIREMENTS.txt').read().splitlines(),
     include_package_data=True,
-    scripts=['bin/reporting-api.py'],
+    scripts=['bin/reporting-api'],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Web Environment',
