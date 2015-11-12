@@ -21,7 +21,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="OpenStack Reporting API Service"
 NAME=reporting-api
-DAEMON=/usr/bin/$NAME.py
+DAEMON=/usr/bin/$NAME
 DAEMON_ARGS=""
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
