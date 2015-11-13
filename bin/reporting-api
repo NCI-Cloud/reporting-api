@@ -1,0 +1,59 @@
+#!/usr/bin/python
+
+"""
+Start the Reporting API application using Paste Deploy.
+"""
+
+import os
+import sys
+import signal
+from paste.deploy import loadapp, loadserver
+import logging
+import argparse
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--confdir', action='store', required=True,
+                        help="Specify config directory")
+    parser.add_argument('--logfile', action='store', required=False,
+                        default='/var/log/reporting-api.log',
+                        help="Specify the file to log to")
+    parser.add_argument('--pidfile', action='store', required=False,
+                        default='/var/run/reporting-api.pid')
+    return parser.parse_args()
+
+
+class Handler(object):
+    def __init__(self):
+        self.pidfile = None
+
+    def create_pidfile(self, pidfile="/var/run/reporting-api.pid"):
+        self.pidfile = pidfile
+        if os.access(pidfile, os.F_OK):
+            logging.error("PID file exists")
+            sys.exit(1)
+        with open(pidfile, 'w') as pf:
+            pf.write("%d" % (os.getpid()))
+
+    def term_handler(self, sig, frame):
+        if self.pidfile:
+            os.remove(self.pidfile)
+        else:
+            logging.error("Could not delete pidfile")
+        sys.exit(0)
+
+
+if __name__ == '__main__':
+    args = parse_args()
+    logging.basicConfig(
+        filename=args.logfile, level=logging.INFO
+    )
+    handler = Handler()
+    signal.signal(signal.SIGTERM, handler.term_handler)
+    signal.signal(signal.SIGINT, handler.term_handler)
+    PASTE_CONFIG = os.path.join(args.confdir, 'paste.config')
+    REPORTING_APP = loadapp('config:' + PASTE_CONFIG)
+    SERVER = loadserver('config:' + PASTE_CONFIG)
+    handler.create_pidfile(args.pidfile)
+    SERVER(REPORTING_APP)
