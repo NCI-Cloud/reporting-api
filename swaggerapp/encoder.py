@@ -4,10 +4,9 @@
 Encode values suitable for output.
 """
 
-import sys
 import json
-from pprint import pprint
 from datetime import datetime
+from unittest import main as test_main, TestCase
 
 
 class JSONStreamingEncoder(object):
@@ -85,17 +84,17 @@ class JSONStreamingEncoder(object):
         """
         if isinstance(value, dict):
             for key, entry in value.iteritems():
-                yield (key, entry)
+                yield (str(key), entry)
         elif isinstance(value, list):
             for tup in enumerate(value):
-                yield tup
+                yield [str(tup[0])] + list(tup[1:])
         else:
             i = 0
             for entry in value:
                 if isinstance(entry, list) and len(entry) == 2:
-                    yield entry
+                    yield (str(entry[0]), entry[1])
                 else:
-                    yield (i, entry)
+                    yield (str(i), entry)
                 i += 1
 
     @staticmethod
@@ -107,7 +106,8 @@ class JSONStreamingEncoder(object):
         """
         if isinstance(value, dict):
             for entry in value.iteritems():
-                yield entry
+                yield entry[0]
+                yield entry[1]
         else:
             for entry in value:
                 yield entry
@@ -187,27 +187,79 @@ class JSONStreamingEncoder(object):
                 yield chunk
 
 
-def test_streaming_encoder(value, array_not_object=None):
-    """
-    Pretty-print the given value and its JSON encoding.
-    """
-    enc = JSONStreamingEncoder()
-    print '--------'
-    print "Input:"
-    pprint(value)
-    if array_not_object is None:
-        print "Either output type"
-    elif array_not_object is True:
-        print "Force array"
-    elif array_not_object is False:
-        print "Force object"
-    sys.stdout.write('Output: ')
-    for chunk in enc.to_json(value, array_not_object):
-        sys.stdout.write(chunk)
-    sys.stdout.write("\n")
-
-
-TEST_DATETIME = datetime(1999, 12, 31, 23, 59, 59, 999999)
+"""
+Pairs of input data and expected output data for unit testing.
+"""
+TEST_INPUT_DATETIME = datetime(1999, 12, 31, 23, 59, 59, 999999)
+TEST_OUTPUT_DATETIME = '"1999-12-31T23:59:59.999999"'
+TEST_INPUT_SUBARRAY = [
+    'element1',
+    'element2'
+]
+TEST_OUTPUT_SUBARRAY = (
+    '['
+    '"element1",'
+    '"element2"'
+    ']'
+)
+TEST_INPUT_SUBDICT = dict(
+    sub_key1='sub_entry1',
+    sub_key2='sub_entry2'
+)
+TEST_OUTPUT_SUBDICT = (
+    '{'
+    '"sub_key2":"sub_entry2",'
+    '"sub_key1":"sub_entry1"'
+    '}'
+)
+TEST_INPUT_LIST = [
+    'first_value', 'second_value', TEST_INPUT_DATETIME, TEST_INPUT_SUBDICT
+]
+TEST_OUTPUT_LIST_ARRAY = (
+    '['
+    '"first_value",'
+    '"second_value",'
+) + TEST_OUTPUT_DATETIME + ',' + TEST_OUTPUT_SUBDICT + (
+    ']'
+)
+TEST_OUTPUT_LIST_OBJECT = (
+    '{'
+    '"0":"first_value",'
+    '"1":"second_value",'
+    '"2":'
+) + TEST_OUTPUT_DATETIME + ',' + (
+    '"3":'
+) + TEST_OUTPUT_SUBDICT + (
+    '}'
+)
+TEST_INPUT_DICT = dict(
+    first_key='first_entry',
+    second_key='second_entry',
+    happy_new_year=TEST_INPUT_DATETIME,
+    subarray=TEST_INPUT_SUBARRAY
+)
+TEST_OUTPUT_DICT_ARRAY = (
+    '['
+    '"subarray",'
+) + TEST_OUTPUT_SUBARRAY + ',' + (
+    '"second_key",'
+    '"second_entry",'
+    '"happy_new_year",'
+) + TEST_OUTPUT_DATETIME + ',' + (
+    '"first_key",'
+    '"first_entry"'
+    ']'
+)
+TEST_OUTPUT_DICT_OBJECT = (
+    '{'
+    '"subarray":'
+) + TEST_OUTPUT_SUBARRAY + ',' + (
+    '"second_key":"second_entry",'
+    '"happy_new_year":'
+) + TEST_OUTPUT_DATETIME + ',' + (
+    '"first_key":"first_entry"'
+    '}'
+)
 
 
 def gen():
@@ -216,37 +268,113 @@ def gen():
     """
     yield 'first_value'
     yield 'second_value'
-    yield TEST_DATETIME
-    yield dict(subkey='sub_entry')
+    yield TEST_INPUT_DATETIME
+    yield TEST_INPUT_SUBDICT
     # If these are of length two, they will be treated as name/value pairs
     # when being forcibly converted to a JSON object, which looks strange.
-    yield ['element1', 'element2', 'element3']
-    yield ('element1', 'element2', 'element3')
-
-TEST_DATA = (
-    ['first_value', 'second_value', TEST_DATETIME, dict(subkey='sub_entry')],
-    ('first_value', 'second_value', TEST_DATETIME, dict(subkey='sub_entry')),
-    dict(
-        firstkey='first_entry',
-        secondkey='second_entry',
-        happy_new_year=TEST_DATETIME,
-        subarray=['element1', 'element2']
-    ),
+    yield TEST_INPUT_SUBARRAY
+TEST_OUTPUT_GEN_ARRAY = (
+    '['
+    '"first_value",'
+    '"second_value",'
+) + TEST_OUTPUT_DATETIME + ',' \
+    + TEST_OUTPUT_SUBDICT + ',' \
+    + TEST_OUTPUT_SUBARRAY + (
+    ']'
 )
 
 
-def test_encode(value):
+# Silence a warning about there being too many public methods.
+# It is not a problem to have too many unit tests.
+# pylint: disable=R0904
+class JSONTestCase(TestCase):
+
     """
-    Test JSON-encoding the given Python value,
-    with and without forcing it to be a certain JSON type.
+    Unit tests for the streaming JSON encoder.
     """
-    test_streaming_encoder(value)
-    test_streaming_encoder(value, True)
-    test_streaming_encoder(value, False)
+
+    def setUp(self):
+        self.enc = JSONStreamingEncoder()
+
+    # Silence warnings about the camelCase method names below.
+    # PyUnit requires such camelCase names.
+    # pylint: disable=C0103
+
+    def testListToAuto(self):
+        """
+        Test converting a Python list into a JSON value.
+        Python lists automatically become JSON arrays.
+        """
+        test_input = TEST_INPUT_LIST
+        test_output_iter = self.enc.to_json(test_input)
+        test_output = ''.join(test_output_iter)
+        self.assertEqual(test_output, TEST_OUTPUT_LIST_ARRAY)
+
+    def testListToArray(self):
+        """
+        Test converting a Python list into a JSON array.
+        """
+        test_input = TEST_INPUT_LIST
+        test_output_iter = self.enc.to_json(test_input, True)
+        test_output = ''.join(test_output_iter)
+        self.assertEqual(test_output, TEST_OUTPUT_LIST_ARRAY)
+
+    def testListToObject(self):
+        """
+        Test converting a Python list into a JSON object.
+        """
+        test_input = TEST_INPUT_LIST
+        test_output_iter = self.enc.to_json(test_input, False)
+        test_output = ''.join(test_output_iter)
+        self.assertEqual(test_output, TEST_OUTPUT_LIST_OBJECT)
+
+    def testDictToAuto(self):
+        """
+        Test converting a Python dictionary into a JSON value.
+        Python dictionaries automatically become JSON objects.
+        """
+        test_input = TEST_INPUT_DICT
+        test_output_iter = self.enc.to_json(test_input)
+        test_output = ''.join(test_output_iter)
+        self.assertEqual(test_output, TEST_OUTPUT_DICT_OBJECT)
+
+    def testDictToArray(self):
+        """
+        Test converting a Python dictionary into a JSON array.
+        """
+        test_input = TEST_INPUT_DICT
+        test_output_iter = self.enc.to_json(test_input, True)
+        test_output = ''.join(test_output_iter)
+        self.assertEqual(test_output, TEST_OUTPUT_DICT_ARRAY)
+
+    def testDictToObject(self):
+        """
+        Test converting a Python dictionary into a JSON object.
+        """
+        test_input = TEST_INPUT_DICT
+        test_output_iter = self.enc.to_json(test_input, False)
+        test_output = ''.join(test_output_iter)
+        self.assertEqual(test_output, TEST_OUTPUT_DICT_OBJECT)
+
+    def testGenToAuto(self):
+        """
+        Test converting a Python generator into a JSON value.
+        Python generators automatically become JSON arrays.
+        """
+        test_input = gen()
+        test_output_iter = self.enc.to_json(test_input)
+        test_output = ''.join(test_output_iter)
+        self.assertEqual(test_output, TEST_OUTPUT_GEN_ARRAY)
+
+    def testGenToArray(self):
+        """
+        Test converting a Python generator into a JSON array.
+        """
+        test_input = gen()
+        test_output_iter = self.enc.to_json(test_input)
+        test_output = ''.join(test_output_iter)
+        self.assertEqual(test_output, TEST_OUTPUT_GEN_ARRAY)
+
 
 if __name__ == '__main__':
-    for data in TEST_DATA:
-        test_encode(data)
-    test_streaming_encoder(gen())
-    test_streaming_encoder(gen(), True)
-    test_streaming_encoder(gen(), False)
+    test_main()
